@@ -1,4 +1,4 @@
-# planner
+# Planner
 
 The planner of future achievements.
 
