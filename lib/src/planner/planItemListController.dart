@@ -127,4 +127,14 @@ class ItemListController extends GetxController {
     updateUserData();
     update();
   }
+
+  PlanItemListModel getItemPlanById(id) {
+    for (int i = 0; i < itemListItemModel.length; i++) {
+      var itemData = itemListItemModel[i];
+      if (itemData.id == id) {
+        return itemData;
+      }
+    }
+    return currentActiveModel;
+  }
 }

@@ -169,7 +169,8 @@ class PlanItemListWidget extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const BuilderPage()),
+                          builder: (context) => BuilderPage(  selectPlanId: id )
+                      ),
                     );
                   },
                   child: const Text(
