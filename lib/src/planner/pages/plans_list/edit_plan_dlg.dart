@@ -1,9 +1,9 @@
 import 'package:get/get.dart';
-import 'package:planner/src/planner/planItemListController.dart';
+import 'package:planner/src/planner/state_manager/plan_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
-import 'constants.dart';
+import '../../constants.dart';
 
 class EditPlanDialog extends StatefulWidget {
   final String? title, description;
@@ -19,7 +19,7 @@ class EditPlanDialog extends StatefulWidget {
 
 class _EditPlanDialogState extends State<EditPlanDialog> {
   final _formKey = GlobalKey<FormState>();
-  final ItemListController contItemList = Get.find();
+  final PlanController contItemList = Get.find();
   final TextEditingController _textFormTitleController = TextEditingController();
   final TextEditingController _textFormDescController = TextEditingController();
   Color currentColor = const Color(0xffb599d6);

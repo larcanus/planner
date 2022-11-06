@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'builderPage.dart';
-import 'confirmDlg.dart';
-import 'constants.dart';
-import 'editPlanDlg.dart';
+import '../builder/builder_page.dart';
+import 'confirm_dlg.dart';
+import '../../constants.dart';
+import 'edit_plan_dlg.dart';
 import 'package:get/get.dart';
-import 'package:planner/src/planner/planItemListController.dart';
+import 'package:planner/src/planner/state_manager/plan_controller.dart';
 
 class PlanItemListWidget extends StatelessWidget {
   final Function updateWidgetState;
@@ -26,7 +26,7 @@ class PlanItemListWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ItemListController contItemList = Get.find();
+    final PlanController contItemList = Get.find();
     final gradientColor = COLORS_GRADIENT[backgroundColor] ??
         [
           const Color(0xffb599d6),

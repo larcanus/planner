@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:planner/src/planner/planItemListController.dart';
+import 'package:planner/src/planner/state_manager/plan_controller.dart';
 
 class CurrentPlanPage extends StatefulWidget {
   const CurrentPlanPage({Key? key}) : super(key: key);
@@ -10,7 +10,7 @@ class CurrentPlanPage extends StatefulWidget {
 }
 
 class _CurrentPlanPageState extends State<CurrentPlanPage> {
-  final ItemListController _conItemList = Get.find();
+  final PlanController _conItemList = Get.find();
 
   @override
   Widget build(BuildContext context) {

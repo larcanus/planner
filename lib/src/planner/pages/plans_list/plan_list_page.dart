@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:planner/src/planner/editPlanDlg.dart';
-import 'package:planner/src/planner/planItemListController.dart';
+import 'package:planner/src/planner/pages/plans_list/edit_plan_dlg.dart';
+import 'package:planner/src/planner/state_manager/plan_controller.dart';
 
 class PlanListPage extends StatefulWidget {
   const PlanListPage({Key? key}) : super(key: key);
@@ -11,7 +11,7 @@ class PlanListPage extends StatefulWidget {
 }
 
 class _PlanListPageState extends State<PlanListPage> {
-  final ItemListController _conItemList = Get.find();
+  final PlanController _conItemList = Get.find();
 
   void updateWidgetState() {
     setState(() {});
@@ -21,7 +21,7 @@ class _PlanListPageState extends State<PlanListPage> {
   Widget build(BuildContext context) {
     _conItemList.getPlanListItemWidgets( updateWidgetState );
 
-    return GetBuilder<ItemListController>(
+    return GetBuilder<PlanController>(
       init: _conItemList,
       builder: (controller) => Scaffold(
         body: CustomScrollView(

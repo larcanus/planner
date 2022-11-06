@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:planner/src/planner/planItemListWidget.dart';
-import 'package:planner/src/planner/planItemListModel.dart';
-import 'fileManager.dart';
+import 'package:planner/src/planner/pages/plans_list/plan_item_list_widget.dart';
+import 'package:planner/src/planner/state_manager/plan_item_list_model.dart';
+import 'package:planner/src/planner/state_manager/plan_tree_model.dart';
+import '../constants.dart';
+import '../file_manager.dart';
 
-class ItemListController extends GetxController {
+class PlanController extends GetxController {
   var _selectedTab = 0.obs;
   var _itemListItemModel = <PlanItemListModel>[].obs;
   var _itemListWidgets = <Widget>[].obs;
@@ -31,6 +33,7 @@ class ItemListController extends GetxController {
     _itemListItemModel.clear();
 
     List<dynamic> eternalDataPLan = await getUserData();
+    // вариант загрузки руками без хранилища
     // List<PlanItemListModel> eternalDataPLan = [
     //   PlanItemListModel(
     //       id: UniqueKey().hashCode,
@@ -54,6 +57,12 @@ class ItemListController extends GetxController {
         planeDesc: item['planeName'],
         backgroundColor: item['backgroundColor'],
         isActive: item['isActive'],
+        tree: PlanTreeModel(
+          id: item['tree']['id'],
+          name: item['tree']['name'],
+          parentId: item['tree']['parentId'],
+          childIds: item['tree']['childIds'],
+        ),
       );
       _itemListItemModel.add(planItemModel);
       if (item['isActive']) {
@@ -89,7 +98,13 @@ class ItemListController extends GetxController {
         id: UniqueKey().hashCode,
         planeName: dataName,
         planeDesc: dataDesc,
-        backgroundColor: dataBackgroundColor));
+        backgroundColor: dataBackgroundColor,
+        tree: PlanTreeModel(
+          id: UniqueKey().hashCode,
+          name: NAME_ROOT_STEP,
+          parentId: null,
+          childIds: [],
+        )));
     updateUserData();
     update();
   }

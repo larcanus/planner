@@ -55,3 +55,4 @@ const Map<int, List<Color>> COLORS_GRADIENT = {
 };
 
 const String PATH_NAME_USER_DATA = 'user_data';
+const String NAME_ROOT_STEP = 'Шаг №1';

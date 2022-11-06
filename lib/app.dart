@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:planner/src/planner/currentPlanPage.dart';
-import 'package:planner/src/planner/planItemListController.dart';
-import 'package:planner/src/planner/planListPage.dart';
+import 'package:planner/src/planner/pages/cur_plan/current_plan_page.dart';
+import 'package:planner/src/planner/state_manager/plan_controller.dart';
+import 'package:planner/src/planner/pages/plans_list/plan_list_page.dart';
 
 class FrontPage extends StatefulWidget {
   const FrontPage({Key? key}) : super(key: key);
@@ -12,7 +12,7 @@ class FrontPage extends StatefulWidget {
 }
 
 class _FrontPageState extends State<FrontPage> {
-  final ItemListController _ctrlItemList = Get.put(ItemListController());
+  final PlanController _ctrlItemList = Get.put(PlanController());
 
   @override
   initState() {

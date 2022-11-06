@@ -1,22 +1,28 @@
+import 'package:planner/src/planner/state_manager/plan_tree_model.dart';
+
 class PlanItemListModel {
   int id;
   String planeName;
   String planeDesc;
   int backgroundColor;
   bool isActive;
+  PlanTreeModel tree;
 
   PlanItemListModel(
       {required this.id,
       required this.planeName,
       required this.planeDesc,
       required this.backgroundColor,
-      this.isActive = false});
+      required this.tree,
+      this.isActive = false
+      });
 
   PlanItemListModel.fromJson(Map<String, dynamic> json)
       : id = json['id'],
         planeName = json['planeName'],
         planeDesc = json['planeDesc'],
         backgroundColor = json['backgroundColor'],
+        tree = json['tree'],
         isActive = json['isActive'];
 
   Map<String, dynamic> toJson() => {
@@ -24,6 +30,7 @@ class PlanItemListModel {
         'planeName': planeName,
         'planeDesc': planeDesc,
         'backgroundColor': backgroundColor,
+        'tree': tree,
         'isActive': isActive,
       };
 }
