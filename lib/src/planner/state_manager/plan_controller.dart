@@ -61,7 +61,8 @@ class PlanController extends GetxController {
           id: item['tree']['id'],
           name: item['tree']['name'],
           parentId: item['tree']['parentId'],
-          childIds: item['tree']['childIds'],
+          gPosition: item['tree']['gPosition'],
+          childs: item['tree']['childs'],
         ),
       );
       _itemListItemModel.add(planItemModel);
@@ -103,7 +104,8 @@ class PlanController extends GetxController {
           id: UniqueKey().hashCode,
           name: NAME_ROOT_STEP,
           parentId: null,
-          childIds: [],
+          gPosition: {'x': 50, 'y': 50},
+          childs: [],
         )));
     updateUserData();
     update();
