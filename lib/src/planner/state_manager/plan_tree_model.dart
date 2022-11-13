@@ -4,12 +4,18 @@ class PlanTreeModel {
   int? parentId;
   Map<String,double> gPosition;
   List childs;
+  double width;
+  bool isCircle;
+  double height;
 
   PlanTreeModel({
     required this.id,
     required this.name,
     this.parentId,
     required this.gPosition,
+    required this.width,
+    required this.height,
+    required this.isCircle,
     required this.childs,
   });
 
@@ -18,6 +24,9 @@ class PlanTreeModel {
         name = json['name'],
         parentId = json['parentId'],
         gPosition = json['gPosition'],
+        width = json['width'],
+        height = json['height'],
+        isCircle = json['isCircle'],
         childs = json['childs'];
 
   Map<String, dynamic> toJson() => {
@@ -25,6 +34,9 @@ class PlanTreeModel {
     'name': name,
     'parentId': parentId,
     'gPosition': gPosition,
+    'width': width,
+    'height': height,
+    'isCircle': isCircle,
     'childs': childs,
   };
 }

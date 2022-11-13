@@ -11,6 +11,8 @@ import 'package:flame/input.dart';
 import 'package:flame/palette.dart';
 import 'package:planner/src/planner/state_manager/plan_tree_model.dart';
 
+import '../../constants.dart';
+
 class BuilderPage extends StatelessWidget {
   final int selectPlanId;
 
@@ -31,8 +33,11 @@ class BuilderPage extends StatelessWidget {
   }
 }
 
-class MyGame extends FlameGame with HasTappables, ScrollDetector, ScaleDetector {
+class MyGame extends FlameGame
+    with HasTappables, ScrollDetector, ScaleDetector {
   PlanItemListModel plan;
+  late double worldWidth = size.x;
+  late double worldHeight = size.y;
 
   MyGame(this.plan);
 
@@ -41,11 +46,12 @@ class MyGame extends FlameGame with HasTappables, ScrollDetector, ScaleDetector 
 
   @override
   Future<void> onLoad() async {
-    onGameResize(Vector2(1000, 2000));
+    // onGameResize(Vector2(1000, 1500));
     buildTree();
-
+    // camera.viewport = FixedResolutionViewport(Vector2(400, 700));
     // camera.setRelativeOffset(Anchor.center);
     camera.speed = 100;
+    // camera.worldBounds = Rect.fromLTWH(0, 0, worldWidth, worldHeight);
     // var s = canvasSize;
     // var d = viewportProjector;
     // var h = projector;
@@ -88,14 +94,6 @@ class MyGame extends FlameGame with HasTappables, ScrollDetector, ScaleDetector 
     }
   }
 
-  @override
-  void onTapUp(int pointerId, TapUpInfo info) {
-    super.onTapUp(pointerId, info);
-    if (!info.handled) {
-      final touchPoint = info.eventPosition.game;
-      add(Square(touchPoint));
-    }
-  }
 
   void buildTree() {
     // готовое дерево из трех шагов
@@ -103,31 +101,40 @@ class MyGame extends FlameGame with HasTappables, ScrollDetector, ScaleDetector 
         id: 0000000,
         name: 'node root',
         parentId: null,
+        width: 140,
+        height: 100,
+        isCircle: false,
         gPosition: {
-          'x': 50,
-          'y': 80
+          'x': 0,
+          'y': 0
         },
         childs: [
           PlanTreeModel(
             id: 1111111,
             name: 'node 1',
             parentId: 0000000,
-            gPosition: {'x': 200, 'y': 80},
+            width: 140,
+            height: 105,
+            isCircle: false,
+            gPosition: {'x': 150, 'y': 80},
             childs: [
               PlanTreeModel(
                 id: 2222222,
                 name: 'node 2',
                 parentId: 1111111,
-                gPosition: {'x': 240, 'y': 220},
+                width: 140,
+                height: 105,
+                isCircle: false,
+                gPosition: {'x': 250, 'y': 220},
                 childs: [],
               )
             ],
           ),
         ]);
-
     // добавляем рута
     createStep(plan.tree);
     buildBranch(plan.tree.childs);
+    camera.worldBounds = Rect.fromLTWH(0, 0, worldWidth, worldHeight);
   }
 
   void buildBranch(List childs) {
@@ -142,15 +149,28 @@ class MyGame extends FlameGame with HasTappables, ScrollDetector, ScaleDetector 
   }
 
   void createStep(PlanTreeModel stepData) {
-    Vector2 gVectorPosStep = Vector2(stepData.gPosition['x']!, stepData.gPosition['y']!);
-    var step = Step(position: gVectorPosStep);
+    bool isRootStep =
+        stepData.gPosition['x'] == 0 && stepData.gPosition['y'] == 0;
+    var posX = isRootStep
+        ? size.x / 2 - stepData.width / 2
+        : size.x / 2 + stepData.gPosition['x']!;
+    var posY = isRootStep
+        ? size.y / 2 - stepData.height / 2
+        : size.y / 2 + stepData.gPosition['y']!;
+
+    setWorldBoundsMax(posX + 200, posY + 200);
+    Vector2 gVectorPosStep = Vector2(posX, posY);
+    var step = Step(
+        squareWidth: stepData.width,
+        squareHeight: stepData.height,
+        position: gVectorPosStep);
     add(step);
 
     final regularTextStyle =
         TextStyle(fontSize: 18, color: BasicPalette.green.color);
     final regular = TextPaint(style: regularTextStyle);
-    var gPosTextX = stepData.gPosition['x']! + step.width / 2;
-    var gPosTextY = stepData.gPosition['y']! + step.height / 2;
+    var gPosTextX = posX + step.width / 2;
+    var gPosTextY = posY + step.height / 2;
 
     Vector2 gVectorPosText = Vector2(gPosTextX, gPosTextY);
     add(TextComponent(
@@ -159,33 +179,78 @@ class MyGame extends FlameGame with HasTappables, ScrollDetector, ScaleDetector 
         anchor: Anchor.center,
         position: gVectorPosText));
   }
+
+  setWorldBoundsMax(width, height) {
+    worldWidth = width > worldWidth ? width : worldWidth;
+    worldHeight = height > worldHeight ? height : worldHeight;
+  }
 }
 
 class Step extends PositionComponent with Tappable {
-  Step({required Vector2 position}) : super(position: position);
+  double squareWidth = 100.0;
+  double squareHeight = 100.0;
 
-  static const squareSize = 100.0;
+  Step(
+      {required Vector2 position,
+      required this.squareWidth,
+      required this.squareHeight})
+      : super(position: position);
   static Paint white = BasicPalette.white.paint();
 
   @override
   void render(Canvas canvas) {
+    super.render(canvas);
     canvas.drawRect(size.toRect(), white);
-  }
-
-  @override
-  void update(double dt) {
-    super.update(dt);
   }
 
   @override
   Future<void> onLoad() async {
     super.onLoad();
-    size.setValues(squareSize, squareSize);
+    size.setValues(squareWidth, squareHeight);
   }
 
   @override
-  bool onTapUp(TapUpInfo info) {
+  bool onTapDown(TapDownInfo info) {
     print(info);
+    super.onTapDown(info);
+    if (!info.handled) {
+      final touchPoint = Vector2(0, 0);
+      Vector2 sizeTools = Vector2(squareWidth, squareHeight);
+      add(StepTools(
+          position: touchPoint,
+          size : sizeTools));
+    }
+    return true;
+  }
+}
+
+class StepTools extends PositionComponent with Tappable {
+
+  StepTools(
+      {required Vector2 position,
+      required Vector2 size})
+      : super(position: position, size: size);
+
+  @override
+  void render(Canvas canvas) {
+    super.render(canvas);
+    Paint stylePaint = Paint();
+    stylePaint.strokeWidth = 1.4;
+    stylePaint.style = PaintingStyle.stroke;
+    stylePaint.color = COLOR_BORDER_STEP_TOOLS;
+    canvas.drawRect(size.toRect(), stylePaint);
+  }
+
+  @override
+  Future<void> onLoad() async {
+    super.onLoad();
+  }
+
+  @override
+  bool onTapDown(TapDownInfo info) {
+    print(info);
+    removeFromParent();
+    info.handled = true;
     return true;
   }
 }
