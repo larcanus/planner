@@ -94,7 +94,6 @@ class MyGame extends FlameGame
     }
   }
 
-
   void buildTree() {
     // готовое дерево из трех шагов
     plan.tree = PlanTreeModel(
@@ -158,12 +157,14 @@ class MyGame extends FlameGame
         ? size.y / 2 - stepData.height / 2
         : size.y / 2 + stepData.gPosition['y']!;
 
-    setWorldBoundsMax(posX + 200, posY + 200);
+    setWorldBoundsMax(posX + 400, posY + 400);
     Vector2 gVectorPosStep = Vector2(posX, posY);
     var step = Step(
-        squareWidth: stepData.width,
-        squareHeight: stepData.height,
-        position: gVectorPosStep);
+      squareWidth: stepData.width,
+      squareHeight: stepData.height,
+      position: gVectorPosStep,
+      camera: camera,
+    );
     add(step);
 
     final regularTextStyle =
@@ -184,16 +185,28 @@ class MyGame extends FlameGame
     worldWidth = width > worldWidth ? width : worldWidth;
     worldHeight = height > worldHeight ? height : worldHeight;
   }
+
+  @override
+  void onTapDown(int pointerId, TapDownInfo info) {
+    // TODO: implement onTapDown
+    super.onTapDown(pointerId, info);
+    print('widget----${info.eventPosition.widget}');
+    print('global---${info.eventPosition.global}');
+    print('game---${info.eventPosition.game}');
+    print('camera.position gg ---- ${camera.position}');
+  }
 }
 
 class Step extends PositionComponent with Tappable {
   double squareWidth = 100.0;
   double squareHeight = 100.0;
+  Camera camera;
 
   Step(
       {required Vector2 position,
       required this.squareWidth,
-      required this.squareHeight})
+      required this.squareHeight,
+      required this.camera})
       : super(position: position);
   static Paint white = BasicPalette.white.paint();
 
@@ -207,6 +220,7 @@ class Step extends PositionComponent with Tappable {
   Future<void> onLoad() async {
     super.onLoad();
     size.setValues(squareWidth, squareHeight);
+
   }
 
   @override
@@ -216,19 +230,15 @@ class Step extends PositionComponent with Tappable {
     if (!info.handled) {
       final touchPoint = Vector2(0, 0);
       Vector2 sizeTools = Vector2(squareWidth, squareHeight);
-      add(StepTools(
-          position: touchPoint,
-          size : sizeTools));
+      camera.followComponent(this);
+      add(StepTools(position: touchPoint, size: sizeTools));
     }
     return true;
   }
 }
 
 class StepTools extends PositionComponent with Tappable {
-
-  StepTools(
-      {required Vector2 position,
-      required Vector2 size})
+  StepTools({required Vector2 position, required Vector2 size})
       : super(position: position, size: size);
 
   @override
@@ -244,6 +254,7 @@ class StepTools extends PositionComponent with Tappable {
   @override
   Future<void> onLoad() async {
     super.onLoad();
+    anchor = Anchor.topLeft;
   }
 
   @override
