@@ -190,10 +190,10 @@ class MyGame extends FlameGame
   void onTapDown(int pointerId, TapDownInfo info) {
     // TODO: implement onTapDown
     super.onTapDown(pointerId, info);
-    print('widget----${info.eventPosition.widget}');
-    print('global---${info.eventPosition.global}');
-    print('game---${info.eventPosition.game}');
-    print('camera.position gg ---- ${camera.position}');
+    // print('widget----${info.eventPosition.widget}');
+    // print('global---${info.eventPosition.global}');
+    // print('game---${info.eventPosition.game}');
+    // print('camera.position gg ---- ${camera.position}');
   }
 }
 
@@ -220,7 +220,6 @@ class Step extends PositionComponent with Tappable {
   Future<void> onLoad() async {
     super.onLoad();
     size.setValues(squareWidth, squareHeight);
-
   }
 
   @override
@@ -230,9 +229,28 @@ class Step extends PositionComponent with Tappable {
     if (!info.handled) {
       final touchPoint = Vector2(0, 0);
       Vector2 sizeTools = Vector2(squareWidth, squareHeight);
-      camera.followComponent(this);
+      double posWidgetGlobalX = position.x + squareWidth / 2;
+      double posWidgetGlobalY = position.y + squareHeight / 2;
+      Vector2 centerWidgetScreenPos = Vector2(
+          posWidgetGlobalX - camera.canvasSize.x / 2,
+          posWidgetGlobalY - camera.canvasSize.y / 2);
+      camera.speed = 450;
+      camera.moveTo(centerWidgetScreenPos);
       add(StepTools(position: touchPoint, size: sizeTools));
     }
+    return true;
+  }
+
+  @override
+  bool onTapUp(TapUpInfo info) {
+    super.onTapUp(info);
+    double posWidgetGlobalX = position.x + squareWidth / 2;
+    double posWidgetGlobalY = position.y + squareHeight / 2;
+    Vector2 centerWidgetScreenPos = Vector2(
+        posWidgetGlobalX - camera.canvasSize.x / 2,
+        posWidgetGlobalY - camera.canvasSize.y / 2);
+    camera.speed = 450;
+    camera.moveTo(centerWidgetScreenPos);
     return true;
   }
 }
