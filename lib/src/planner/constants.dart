@@ -58,3 +58,4 @@ const String PATH_NAME_USER_DATA = 'user_data';
 const String NAME_ROOT_STEP = 'Шаг №1';
 
 const Color COLOR_BORDER_STEP_TOOLS = Color(0xFF00BFFF);
+const double STROKE_BORDER_STEP_TOOLS = 2.1;

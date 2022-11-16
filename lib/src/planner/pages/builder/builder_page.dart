@@ -236,7 +236,15 @@ class Step extends PositionComponent with Tappable {
           posWidgetGlobalY - camera.canvasSize.y / 2);
       camera.speed = 450;
       camera.moveTo(centerWidgetScreenPos);
-      add(StepTools(position: touchPoint, size: sizeTools));
+      StepTools stepTools = StepTools(position: touchPoint, size: sizeTools);
+      add(stepTools);
+
+      final PlanController planList = Get.find();
+      StepTools selectedStepTools = planList.selectedStepTools;
+      if( selectedStepTools != null ){
+        selectedStepTools.removeFromParent();
+      }
+      planList.selectedStepTools = stepTools;
     }
     return true;
   }
@@ -263,7 +271,7 @@ class StepTools extends PositionComponent with Tappable {
   void render(Canvas canvas) {
     super.render(canvas);
     Paint stylePaint = Paint();
-    stylePaint.strokeWidth = 1.4;
+    stylePaint.strokeWidth = STROKE_BORDER_STEP_TOOLS;
     stylePaint.style = PaintingStyle.stroke;
     stylePaint.color = COLOR_BORDER_STEP_TOOLS;
     canvas.drawRect(size.toRect(), stylePaint);
@@ -317,8 +325,12 @@ class Square extends PositionComponent with Tappable {
 
   @override
   bool onTapUp(TapUpInfo info) {
-    removeFromParent();
+    removeFromParentSelf();
     info.handled = true;
     return true;
+  }
+
+  void removeFromParentSelf(){
+    removeFromParent();
   }
 }

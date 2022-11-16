@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:planner/src/planner/pages/builder/builder_page.dart';
 import 'package:planner/src/planner/pages/plans_list/plan_item_list_widget.dart';
 import 'package:planner/src/planner/state_manager/plan_item_list_model.dart';
 import 'package:planner/src/planner/state_manager/plan_tree_model.dart';
@@ -12,6 +13,7 @@ class PlanController extends GetxController {
   var _itemListWidgets = <Widget>[].obs;
   var _currentActiveModel = null;
   var _currentActiveModelName = 'Нет активного плана'.obs;
+  var _selectedStepTools = null;
 
   get selectedTab => _selectedTab.value;
 
@@ -28,6 +30,9 @@ class PlanController extends GetxController {
   get currentActiveModelName => _currentActiveModelName.value;
 
   set currentActiveModelName(name) => _currentActiveModelName.value = name;
+
+  get selectedStepTools => _selectedStepTools;
+  set selectedStepTools(stepTools) => _selectedStepTools = stepTools;
 
   void loadPlanItemModels() async {
     _itemListItemModel.clear();
