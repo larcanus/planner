@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:planner/src/planner/state_manager/plan_controller.dart';
 import 'package:planner/src/planner/state_manager/plan_item_list_model.dart';
-import 'dart:math' as math;
+import 'dart:math';
 
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
@@ -20,15 +19,40 @@ class BuilderPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final PlanController planList = Get.find();
-    PlanItemListModel plan = planList.getItemPlanById(selectPlanId);
+    final PlanController planListController = Get.find();
+    PlanItemListModel plan = planListController.getItemPlanById(selectPlanId);
+    planListController.selectedPlan = plan;
     imageCache.clear();
-
     return Scaffold(
       appBar: AppBar(title: Text(plan.planeDesc)),
-      body: GameWidget(
-        game: MyGame(plan),
-      ),
+      body: GameWidget(game: MyGame(plan), overlayBuilderMap: {
+        'ButtonsStep': (BuildContext context, MyGame game) {
+          return Column(mainAxisAlignment: MainAxisAlignment.end, children: [
+            Container(
+                margin: const EdgeInsets.all(23),
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                       IconButton(
+                          icon: const Icon(size: 35,Icons.delete),
+                          color: COLOR_BUTTONS_STEP,
+                          onPressed: () {},
+                        ),
+                      IconButton(
+                        icon: const Icon(size: 35, Icons.mode_edit_rounded),
+                        color: COLOR_BUTTONS_STEP,
+                        onPressed: () {},
+                      ),
+                      IconButton(
+                        icon: const Icon(
+                            size: 35, Icons.add_circle_outline_sharp),
+                        color: COLOR_BUTTONS_STEP,
+                        onPressed: () {},
+                      ),
+                    ]))
+          ]);
+        },
+      }),
     );
   }
 }
@@ -59,8 +83,6 @@ class MyGame extends FlameGame
     // var gg = camera.gameSize;
     // var zom = camera.zoom;
     // var zosm = FixedResolutionViewport;
-    // camera.zoom = 0.8;
-    // camera.moveTo(Vector2(500, 800));
   }
 
   void clampZoom() {
@@ -97,34 +119,65 @@ class MyGame extends FlameGame
   void buildTree() {
     // готовое дерево из трех шагов
     plan.tree = PlanTreeModel(
-        id: 0000000,
+        id: 11,
         name: 'node root',
-        parentId: null,
+        parentId: 0,
         width: 140,
         height: 100,
-        isCircle: false,
+        type: STEP_TYPE_RECT,
         gPosition: {
           'x': 0,
           'y': 0
         },
         childs: [
           PlanTreeModel(
-            id: 1111111,
-            name: 'node 1',
-            parentId: 0000000,
+            id: 112,
+            name: 'Branch 1 node 1',
+            parentId: 11,
             width: 140,
             height: 105,
-            isCircle: false,
+            type: STEP_TYPE_RECT,
             gPosition: {'x': 150, 'y': 80},
             childs: [
               PlanTreeModel(
-                id: 2222222,
-                name: 'node 2',
-                parentId: 1111111,
+                id: 1121,
+                name: 'Branch 1-1 node 1-1',
+                parentId: 112,
                 width: 140,
                 height: 105,
-                isCircle: false,
-                gPosition: {'x': 250, 'y': 220},
+                type: STEP_TYPE_RECT,
+                gPosition: {'x': 340, 'y': 220},
+                childs: [],
+              ),
+              PlanTreeModel(
+                id: 1122,
+                name: 'Branch 1-2 node 2-1',
+                parentId: 112,
+                width: 140,
+                height: 105,
+                type: STEP_TYPE_RECT,
+                gPosition: {'x': 340, 'y': 90},
+                childs: [],
+              )
+            ],
+          ),
+          PlanTreeModel(
+            id: 113,
+            name: 'Branch 2 node 1',
+            parentId: 11,
+            width: 140,
+            height: 105,
+            type: STEP_TYPE_RECT,
+            gPosition: {'x': 150, 'y': -80},
+            childs: [
+              PlanTreeModel(
+                id: 114,
+                name: 'Branch 2-1 node 1-2',
+                parentId: 113,
+                width: 140,
+                height: 105,
+                type: STEP_TYPE_RECT,
+                gPosition: {'x': 350, 'y': -80},
                 childs: [],
               )
             ],
@@ -148,6 +201,52 @@ class MyGame extends FlameGame
   }
 
   void createStep(PlanTreeModel stepData) {
+    final PlanController planController = Get.find();
+    var parent = planController.getStepById(stepData.parentId);
+    Vector2 gVectorPosStep = getGlobalPosStep(stepData);
+    bool isRootStep =
+        stepData.gPosition['x'] == 0 && stepData.gPosition['y'] == 0;
+
+    // print('stepData.parentId  ${stepData.parentId}');
+    // print('parent  ${parent}');
+
+    // добавляем шаг
+    Step step = Step(
+      squareWidth: stepData.width,
+      squareHeight: stepData.height,
+      position: gVectorPosStep,
+      camera: camera,
+    );
+    add(step);
+
+    // добавляем линию связи шагов
+    StepLine stepLine = StepLine(
+      parentPosition: isRootStep ? Vector2(0, 0) : getGlobalPosStep(parent),
+      positionStart: isRootStep
+          ? Vector2(0, 0)
+          : getPosLineStart(parent, getGlobalPosStep(parent)),
+      positionEnd: isRootStep
+          ? Vector2(0, 0)
+          : getPosLineEnd(stepData, getGlobalPosStep(parent), gVectorPosStep),
+    );
+    add(stepLine);
+
+    // добавляем текст форму с сокращенным описанием шага
+    final regularTextStyle =
+        TextStyle(fontSize: 18, color: BasicPalette.green.color);
+    final regular = TextPaint(style: regularTextStyle);
+    var gPosTextX = gVectorPosStep.x + step.width / 2;
+    var gPosTextY = gVectorPosStep.y + step.height / 2;
+
+    Vector2 gVectorPosText = Vector2(gPosTextX, gPosTextY);
+    add(TextComponent(
+        text: stepData.name,
+        textRenderer: regular,
+        anchor: Anchor.center,
+        position: gVectorPosText));
+  }
+
+  Vector2 getGlobalPosStep(stepData) {
     bool isRootStep =
         stepData.gPosition['x'] == 0 && stepData.gPosition['y'] == 0;
     var posX = isRootStep
@@ -158,27 +257,28 @@ class MyGame extends FlameGame
         : size.y / 2 + stepData.gPosition['y']!;
 
     setWorldBoundsMax(posX + 400, posY + 400);
-    Vector2 gVectorPosStep = Vector2(posX, posY);
-    var step = Step(
-      squareWidth: stepData.width,
-      squareHeight: stepData.height,
-      position: gVectorPosStep,
-      camera: camera,
-    );
-    add(step);
+    return Vector2(posX, posY);
+  }
 
-    final regularTextStyle =
-        TextStyle(fontSize: 18, color: BasicPalette.green.color);
-    final regular = TextPaint(style: regularTextStyle);
-    var gPosTextX = posX + step.width / 2;
-    var gPosTextY = posY + step.height / 2;
+  Vector2 getPosLineStart(dataStep, pos) {
+    double xPosCenter = pos.x + dataStep.width;
+    double yPosCenter = pos.y + dataStep.height / 2;
+    if (dataStep.type == STEP_TYPE_CIRCLE) {
+      yPosCenter = 0;
+    }
 
-    Vector2 gVectorPosText = Vector2(gPosTextX, gPosTextY);
-    add(TextComponent(
-        text: stepData.name,
-        textRenderer: regular,
-        anchor: Anchor.center,
-        position: gVectorPosText));
+    return Vector2(xPosCenter, yPosCenter);
+  }
+
+  Vector2 getPosLineEnd(dataStep, posParent, posChild) {
+    double difX = posChild.x - posParent.x - dataStep.width;
+    double difY = posChild.y - posParent.y;
+    double xPosCenter = dataStep == null ? 0 : difX;
+    double yPosCenter = dataStep == null ? 0 : difY;
+    if (dataStep?.type == STEP_TYPE_CIRCLE) {
+      yPosCenter = 0;
+    }
+    return Vector2(xPosCenter, yPosCenter);
   }
 
   setWorldBoundsMax(width, height) {
@@ -188,11 +288,10 @@ class MyGame extends FlameGame
 
   @override
   void onTapDown(int pointerId, TapDownInfo info) {
-    // TODO: implement onTapDown
     super.onTapDown(pointerId, info);
-    // print('widget----${info.eventPosition.widget}');
-    // print('global---${info.eventPosition.global}');
-    // print('game---${info.eventPosition.game}');
+    print('widget----${info.eventPosition.widget}');
+    print('global---${info.eventPosition.global}');
+    print('game---${info.eventPosition.game}');
     // print('camera.position gg ---- ${camera.position}');
   }
 }
@@ -201,6 +300,7 @@ class Step extends PositionComponent with Tappable {
   double squareWidth = 100.0;
   double squareHeight = 100.0;
   Camera camera;
+  final PlanController planController = Get.find();
 
   Step(
       {required Vector2 position,
@@ -209,6 +309,8 @@ class Step extends PositionComponent with Tappable {
       required this.camera})
       : super(position: position);
   static Paint white = BasicPalette.white.paint();
+
+  get overlays => null;
 
   @override
   void render(Canvas canvas) {
@@ -224,8 +326,11 @@ class Step extends PositionComponent with Tappable {
 
   @override
   bool onTapDown(TapDownInfo info) {
-    print(info);
     super.onTapDown(info);
+    planController.selectedStep = null;
+    // print('parentPosition.x----${parentPosition}');
+    // print('stepPosition.x----${position}');
+
     if (!info.handled) {
       final touchPoint = Vector2(0, 0);
       Vector2 sizeTools = Vector2(squareWidth, squareHeight);
@@ -239,14 +344,28 @@ class Step extends PositionComponent with Tappable {
       StepTools stepTools = StepTools(position: touchPoint, size: sizeTools);
       add(stepTools);
 
-      final PlanController planList = Get.find();
-      StepTools selectedStepTools = planList.selectedStepTools;
-      if( selectedStepTools != null ){
+      final selectedStepTools = planController.selectedStepTools;
+      if (selectedStepTools != null) {
         selectedStepTools.removeFromParent();
       }
-      planList.selectedStepTools = stepTools;
+      planController.selectedStepTools = stepTools;
+      planController.selectedStep = this;
     }
+    handlerButtonsStep();
     return true;
+  }
+
+  handlerButtonsStep() {
+    Game? game = findGame();
+    var over = game?.overlays;
+    Step? selectedStep = planController.selectedStep;
+    if (over != null && selectedStep != null) {
+      over.add('ButtonsStep');
+    } else {
+      if (over != null && over.isActive('ButtonsStep')) {
+        over.remove('ButtonsStep');
+      }
+    }
   }
 
   @override
@@ -259,21 +378,67 @@ class Step extends PositionComponent with Tappable {
         posWidgetGlobalY - camera.canvasSize.y / 2);
     camera.speed = 450;
     camera.moveTo(centerWidgetScreenPos);
+
     return true;
   }
 }
 
+class StepLine extends PositionComponent {
+  Vector2 parentPosition;
+  Vector2 positionStart;
+  Vector2 positionEnd;
+  Paint stylePaint = Paint();
+  final Path _path = Path();
+
+  StepLine(
+      {required this.parentPosition,
+      required this.positionStart,
+      required this.positionEnd})
+      : super(position: positionStart);
+
+  @override
+  Future<void> onLoad() async {
+    super.onLoad();
+    // print('parentPosition.x----${parentPosition}');
+    // print('positionStart.x----${positionStart}');
+    // print('positionEnd.x----${positionEnd}');
+  }
+
+  @override
+  void render(Canvas canvas) {
+    super.render(canvas);
+    buildPath();
+
+    stylePaint
+      ..strokeWidth = STROKE_BORDER_STEP_TOOLS
+      ..style = PaintingStyle.stroke
+      ..color = COLOR_BORDER_STEP_TOOLS
+      ..strokeWidth = 2;
+
+    canvas.drawPath(_path, stylePaint);
+  }
+
+  buildPath() {
+    _path
+      ..moveTo(0, 0)
+      ..lineTo(positionEnd.x, positionEnd.y);
+  }
+}
+
 class StepTools extends PositionComponent with Tappable {
+  Paint stylePaint = Paint();
+
   StepTools({required Vector2 position, required Vector2 size})
       : super(position: position, size: size);
 
   @override
   void render(Canvas canvas) {
     super.render(canvas);
-    Paint stylePaint = Paint();
-    stylePaint.strokeWidth = STROKE_BORDER_STEP_TOOLS;
-    stylePaint.style = PaintingStyle.stroke;
-    stylePaint.color = COLOR_BORDER_STEP_TOOLS;
+
+    stylePaint
+      ..strokeWidth = STROKE_BORDER_STEP_TOOLS
+      ..style = PaintingStyle.stroke
+      ..color = COLOR_BORDER_STEP_TOOLS;
     canvas.drawRect(size.toRect(), stylePaint);
   }
 
@@ -285,52 +450,10 @@ class StepTools extends PositionComponent with Tappable {
 
   @override
   bool onTapDown(TapDownInfo info) {
-    print(info);
     removeFromParent();
     info.handled = true;
     return true;
   }
 }
 
-class Square extends PositionComponent with Tappable {
-  static const speed = 0.25;
-  static const squareSize = 128.0;
-
-  static Paint green = BasicPalette.green.paint();
-  static Paint red = BasicPalette.red.paint();
-  static Paint blue = BasicPalette.blue.paint();
-
-  Square(Vector2 position) : super(position: position);
-
-  @override
-  void render(Canvas c) {
-    c.drawRect(size.toRect(), green);
-    c.drawRect(const Rect.fromLTWH(0, 0, 3, 3), red);
-    c.drawRect(Rect.fromLTWH(width / 2, height / 2, 3, 3), blue);
-  }
-
-  @override
-  void update(double dt) {
-    super.update(dt);
-    angle += speed * dt;
-    angle %= 2 * math.pi;
-  }
-
-  @override
-  Future<void> onLoad() async {
-    super.onLoad();
-    size.setValues(squareSize, squareSize);
-    anchor = Anchor.center;
-  }
-
-  @override
-  bool onTapUp(TapUpInfo info) {
-    removeFromParentSelf();
-    info.handled = true;
-    return true;
-  }
-
-  void removeFromParentSelf(){
-    removeFromParent();
-  }
-}
+class ButtonStep extends PositionComponent {}

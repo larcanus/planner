@@ -56,6 +56,10 @@ const Map<int, List<Color>> COLORS_GRADIENT = {
 
 const String PATH_NAME_USER_DATA = 'user_data';
 const String NAME_ROOT_STEP = 'Шаг №1';
+const String STEP_TYPE_RECT = 'rect';
+const String STEP_TYPE_CIRCLE = 'circle';
 
+const Color COLOR_BUTTONS_STEP = Color(0xFF0C7391);
+const Color COLOR_LINE_BRANCH_STEPS = Color(0xFF021E26);
 const Color COLOR_BORDER_STEP_TOOLS = Color(0xFF00BFFF);
 const double STROKE_BORDER_STEP_TOOLS = 2.1;

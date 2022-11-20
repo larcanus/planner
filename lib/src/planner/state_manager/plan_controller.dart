@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:planner/src/planner/pages/builder/builder_page.dart';
@@ -14,6 +16,8 @@ class PlanController extends GetxController {
   var _currentActiveModel = null;
   var _currentActiveModelName = 'Нет активного плана'.obs;
   var _selectedStepTools = null;
+  var _selectedStep = null;
+  var _selectedPlan = null;
 
   get selectedTab => _selectedTab.value;
 
@@ -32,7 +36,16 @@ class PlanController extends GetxController {
   set currentActiveModelName(name) => _currentActiveModelName.value = name;
 
   get selectedStepTools => _selectedStepTools;
+
   set selectedStepTools(stepTools) => _selectedStepTools = stepTools;
+
+  get selectedStep => _selectedStep;
+
+  set selectedStep(step) => _selectedStep = step;
+
+  get selectedPlan => _selectedPlan;
+
+  set selectedPlan(plan) => _selectedPlan = plan;
 
   void loadPlanItemModels() async {
     _itemListItemModel.clear();
@@ -66,9 +79,9 @@ class PlanController extends GetxController {
           id: item['tree']['id'],
           name: item['tree']['name'],
           parentId: item['tree']['parentId'],
-          width :  item['tree']['width'],
-          height :  item['tree']['height'],
-          isCircle :  item['tree']['isCircle'],
+          width: item['tree']['width'],
+          height: item['tree']['height'],
+          type: item['tree']['type'],
           gPosition: item['tree']['gPosition'],
           childs: item['tree']['childs'],
         ),
@@ -111,10 +124,10 @@ class PlanController extends GetxController {
         tree: PlanTreeModel(
           id: UniqueKey().hashCode,
           name: NAME_ROOT_STEP,
-          parentId: null,
-          width : 100,
-          height : 125,
-          isCircle : false,
+          parentId: 0,
+          width: 100,
+          height: 125,
+          type: STEP_TYPE_RECT,
           gPosition: {'x': 0, 'y': 0},
           childs: [],
         )));
@@ -164,5 +177,25 @@ class PlanController extends GetxController {
       }
     }
     return currentActiveModel;
+  }
+
+  getStepById(int id) {
+    var plan = selectedPlan;
+    var rootStep = plan.tree;
+
+    recursiveFind(step) {
+      if(step.id == id){
+        return step;
+      }
+      for (int i = 0; i < step.childs.length; i++) {
+        PlanTreeModel child = step.childs[i];
+        if (child.id == id) {
+          return child;
+        }
+        recursiveFind(child);
+      }
+    }
+
+    return recursiveFind(rootStep);
   }
 }
