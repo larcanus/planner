@@ -11,6 +11,7 @@ import 'package:flame/palette.dart';
 import 'package:planner/src/planner/state_manager/plan_tree_model.dart';
 
 import '../../constants.dart';
+import 'builder_add_step_dlg.dart';
 
 class BuilderPage extends StatelessWidget {
   final int selectPlanId;
@@ -23,35 +24,46 @@ class BuilderPage extends StatelessWidget {
     PlanItemListModel plan = planListController.getItemPlanById(selectPlanId);
     planListController.selectedPlan = plan;
     imageCache.clear();
+
     return Scaffold(
       appBar: AppBar(title: Text(plan.planeDesc)),
       body: GameWidget(game: MyGame(plan), overlayBuilderMap: {
-        'ButtonsStep': (BuildContext context, MyGame game) {
+        'buttonsStep': (BuildContext context, MyGame game) {
           return Column(mainAxisAlignment: MainAxisAlignment.end, children: [
             Container(
                 margin: const EdgeInsets.all(23),
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                       IconButton(
-                          icon: const Icon(size: 35,Icons.delete),
-                          color: COLOR_BUTTONS_STEP,
-                          onPressed: () {},
-                        ),
-                      IconButton(
-                        icon: const Icon(size: 35, Icons.mode_edit_rounded),
-                        color: COLOR_BUTTONS_STEP,
+                      FloatingActionButton(
+                        heroTag: 'btn1',
                         onPressed: () {},
+                        backgroundColor: Colors.green,
+                        child: const Icon(size: 28, Icons.delete),
                       ),
-                      IconButton(
-                        icon: const Icon(
-                            size: 35, Icons.add_circle_outline_sharp),
-                        color: COLOR_BUTTONS_STEP,
+                      FloatingActionButton(
+                        heroTag: 'btn2',
                         onPressed: () {},
+                        backgroundColor: Colors.green,
+                        child: const Icon(size: 35, Icons.edit_note),
+                      ),
+                      FloatingActionButton(
+                        heroTag: 'btn3',
+                        onPressed: () {
+                          print(this);
+                          print(game);
+                          // game.buildTree();
+                          game.overlays.add('addStepOverlay');
+                        },
+                        backgroundColor: Colors.green,
+                        child: const Icon(size: 35, Icons.add),
                       ),
                     ]))
           ]);
         },
+        'addStepOverlay': (BuildContext context, MyGame game) {
+          return StepEditDlg(key: UniqueKey(), game: game);
+        }
       }),
     );
   }
@@ -293,6 +305,9 @@ class MyGame extends FlameGame
     print('global---${info.eventPosition.global}');
     print('game---${info.eventPosition.game}');
     // print('camera.position gg ---- ${camera.position}');
+    if (overlays.isActive('addStepOverlay')) {
+      overlays.remove('addStepOverlay');
+    }
   }
 }
 
@@ -360,10 +375,10 @@ class Step extends PositionComponent with Tappable {
     var over = game?.overlays;
     Step? selectedStep = planController.selectedStep;
     if (over != null && selectedStep != null) {
-      over.add('ButtonsStep');
+      over.add('buttonsStep');
     } else {
-      if (over != null && over.isActive('ButtonsStep')) {
-        over.remove('ButtonsStep');
+      if (over != null && over.isActive('buttonsStep')) {
+        over.remove('buttonsStep');
       }
     }
   }
@@ -455,5 +470,3 @@ class StepTools extends PositionComponent with Tappable {
     return true;
   }
 }
-
-class ButtonStep extends PositionComponent {}
