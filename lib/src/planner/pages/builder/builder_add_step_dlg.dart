@@ -8,11 +8,10 @@ import 'builder_page.dart';
 
 class StepEditDlg extends StatefulWidget {
   final String? title, description;
-  final int? id;
   final MyGame game;
 
   const StepEditDlg(
-      {required Key key, required this.game, this.title, this.description, this.id})
+      {required Key key, required this.game, this.title, this.description})
       : super(key: key);
 
   @override
@@ -21,20 +20,18 @@ class StepEditDlg extends StatefulWidget {
 
 class _StepEditDlgState extends State<StepEditDlg> {
   final _formKey = GlobalKey<FormState>();
-  final PlanController contItemList = Get.find();
+  final PlanController planController = Get.find();
   final TextEditingController _textFormTitleController = TextEditingController();
   final TextEditingController _textFormDescController = TextEditingController();
   Color currentColor = const Color(0xffb599d6);
 
   late final String? title;
   late final String? description;
-  late final int? id;
 
   @override
   initState() {
     title = widget.title;
     description = widget.description;
-    id = widget.id;
 
     _textFormTitleController.text = title ?? '';
     _textFormDescController.text = description ?? '';
@@ -100,12 +97,12 @@ class _StepEditDlgState extends State<StepEditDlg> {
                   labelText: 'Наименование',
                 ),
                 keyboardType: TextInputType.text,
-                // validator: (String? value) {
-                //   if (value == null || value.isEmpty) {
-                //     return 'Это поле не должно быть пустым';
-                //   }
-                //   return null;
-                // },
+                validator: (String? value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Это поле не должно быть пустым';
+                  }
+                  return null;
+                },
                 controller: _textFormTitleController,
               ),
               sizedBoxSpace,
@@ -131,14 +128,15 @@ class _StepEditDlgState extends State<StepEditDlg> {
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    if (id == null) {
-                      // contItemList.addItemList(_textFormTitleController.text,
+                    // if (id == null) {
+                      planController.addStep(_textFormTitleController.text,
+                          _textFormDescController.text, currentColor.value);
+                    // } else {
+                      // planController.updateItemListById(id, _textFormTitleController.text,
                       //     _textFormDescController.text, currentColor.value);
-                    } else {
-                      // contItemList.updateItemListById(id, _textFormTitleController.text,
-                      //     _textFormDescController.text, currentColor.value);
-                    }
+                    // }
                     widget.game.overlays.remove('addStepOverlay');
+                    widget.game.refreshTree();
                   }
                 },
                 child: const Text('Сохранить'),

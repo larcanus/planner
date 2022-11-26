@@ -74,6 +74,7 @@ class MyGame extends FlameGame
   PlanItemListModel plan;
   late double worldWidth = size.x;
   late double worldHeight = size.y;
+  final PlanController planController = Get.find();
 
   MyGame(this.plan);
 
@@ -129,72 +130,6 @@ class MyGame extends FlameGame
   }
 
   void buildTree() {
-    // готовое дерево из трех шагов
-    plan.tree = PlanTreeModel(
-        id: 11,
-        name: 'node root',
-        parentId: 0,
-        width: 140,
-        height: 100,
-        type: STEP_TYPE_RECT,
-        gPosition: {
-          'x': 0,
-          'y': 0
-        },
-        childs: [
-          PlanTreeModel(
-            id: 112,
-            name: 'Branch 1 node 1',
-            parentId: 11,
-            width: 140,
-            height: 105,
-            type: STEP_TYPE_RECT,
-            gPosition: {'x': 150, 'y': 80},
-            childs: [
-              PlanTreeModel(
-                id: 1121,
-                name: 'Branch 1-1 node 1-1',
-                parentId: 112,
-                width: 140,
-                height: 105,
-                type: STEP_TYPE_RECT,
-                gPosition: {'x': 340, 'y': 220},
-                childs: [],
-              ),
-              PlanTreeModel(
-                id: 1122,
-                name: 'Branch 1-2 node 2-1',
-                parentId: 112,
-                width: 140,
-                height: 105,
-                type: STEP_TYPE_RECT,
-                gPosition: {'x': 340, 'y': 90},
-                childs: [],
-              )
-            ],
-          ),
-          PlanTreeModel(
-            id: 113,
-            name: 'Branch 2 node 1',
-            parentId: 11,
-            width: 140,
-            height: 105,
-            type: STEP_TYPE_RECT,
-            gPosition: {'x': 150, 'y': -80},
-            childs: [
-              PlanTreeModel(
-                id: 114,
-                name: 'Branch 2-1 node 1-2',
-                parentId: 113,
-                width: 140,
-                height: 105,
-                type: STEP_TYPE_RECT,
-                gPosition: {'x': 350, 'y': -80},
-                childs: [],
-              )
-            ],
-          ),
-        ]);
     // добавляем рута
     createStep(plan.tree);
     buildBranch(plan.tree.childs);
@@ -213,7 +148,6 @@ class MyGame extends FlameGame
   }
 
   void createStep(PlanTreeModel stepData) {
-    final PlanController planController = Get.find();
     var parent = planController.getStepById(stepData.parentId);
     Vector2 gVectorPosStep = getGlobalPosStep(stepData);
     bool isRootStep =
@@ -224,12 +158,14 @@ class MyGame extends FlameGame
 
     // добавляем шаг
     Step step = Step(
+      id: stepData.id,
       squareWidth: stepData.width,
       squareHeight: stepData.height,
       position: gVectorPosStep,
       camera: camera,
     );
     add(step);
+    planController.componentsInGame.add(step);
 
     // добавляем линию связи шагов
     StepLine stepLine = StepLine(
@@ -242,6 +178,7 @@ class MyGame extends FlameGame
           : getPosLineEnd(stepData, getGlobalPosStep(parent), gVectorPosStep),
     );
     add(stepLine);
+    planController.componentsInGame.add(stepLine);
 
     // добавляем текст форму с сокращенным описанием шага
     final regularTextStyle =
@@ -251,11 +188,13 @@ class MyGame extends FlameGame
     var gPosTextY = gVectorPosStep.y + step.height / 2;
 
     Vector2 gVectorPosText = Vector2(gPosTextX, gPosTextY);
-    add(TextComponent(
+    TextComponent textStep = TextComponent(
         text: stepData.name,
         textRenderer: regular,
         anchor: Anchor.center,
-        position: gVectorPosText));
+        position: gVectorPosText);
+    add(textStep);
+    planController.componentsInGame.add(textStep);
   }
 
   Vector2 getGlobalPosStep(stepData) {
@@ -293,6 +232,14 @@ class MyGame extends FlameGame
     return Vector2(xPosCenter, yPosCenter);
   }
 
+  refreshTree() {
+    var allComponents = planController.componentsInGame;
+    allComponents.forEach((comp) {
+      comp.removeFromParent();
+    });
+    buildTree();
+  }
+
   setWorldBoundsMax(width, height) {
     worldWidth = width > worldWidth ? width : worldWidth;
     worldHeight = height > worldHeight ? height : worldHeight;
@@ -312,13 +259,15 @@ class MyGame extends FlameGame
 }
 
 class Step extends PositionComponent with Tappable {
+  int id;
   double squareWidth = 100.0;
   double squareHeight = 100.0;
   Camera camera;
   final PlanController planController = Get.find();
 
   Step(
-      {required Vector2 position,
+      {required this.id,
+      required Vector2 position,
       required this.squareWidth,
       required this.squareHeight,
       required this.camera})

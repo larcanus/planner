@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:planner/src/planner/pages/builder/builder_page.dart';
@@ -18,6 +16,7 @@ class PlanController extends GetxController {
   var _selectedStepTools = null;
   var _selectedStep = null;
   var _selectedPlan = null;
+  var _componentsInGame = [];
 
   get selectedTab => _selectedTab.value;
 
@@ -42,6 +41,8 @@ class PlanController extends GetxController {
   get selectedStep => _selectedStep;
 
   set selectedStep(step) => _selectedStep = step;
+
+  get componentsInGame => _componentsInGame;
 
   get selectedPlan => _selectedPlan;
 
@@ -69,23 +70,15 @@ class PlanController extends GetxController {
 
     for (int i = 0; i < eternalDataPLan.length; i++) {
       final item = eternalDataPLan[i];
+      PlanTreeModel tree = getTreeStructureFromJson(item['tree']);
+
       final planItemModel = PlanItemListModel(
-        id: item['id'],
-        planeName: item['planeName'],
-        planeDesc: item['planeName'],
-        backgroundColor: item['backgroundColor'],
-        isActive: item['isActive'],
-        tree: PlanTreeModel(
-          id: item['tree']['id'],
-          name: item['tree']['name'],
-          parentId: item['tree']['parentId'],
-          width: item['tree']['width'],
-          height: item['tree']['height'],
-          type: item['tree']['type'],
-          gPosition: item['tree']['gPosition'],
-          childs: item['tree']['childs'],
-        ),
-      );
+          id: item['id'],
+          planeName: item['planeName'],
+          planeDesc: item['planeName'],
+          backgroundColor: item['backgroundColor'],
+          isActive: item['isActive'],
+          tree: tree);
       _itemListItemModel.add(planItemModel);
       if (item['isActive']) {
         currentActiveModel = planItemModel;
@@ -93,6 +86,26 @@ class PlanController extends GetxController {
       }
     }
     update();
+  }
+
+  getTreeStructureFromJson(stepData) {
+    PlanTreeModel step = PlanTreeModel(
+      id: stepData['id'],
+      name: stepData['name'],
+      parentId: stepData['parentId'],
+      width: stepData['width'],
+      height: stepData['height'],
+      type: stepData['type'],
+      gPosition: stepData['gPosition'].cast<String, double>(),
+      childs: [],
+    );
+
+    if (stepData['childs'].isNotEmpty) {
+      stepData['childs'].forEach((child) {
+        step.childs.add(getTreeStructureFromJson(child));
+      });
+    }
+    return step;
   }
 
   updateUserData() {
@@ -125,10 +138,10 @@ class PlanController extends GetxController {
           id: UniqueKey().hashCode,
           name: NAME_ROOT_STEP,
           parentId: 0,
-          width: 100,
-          height: 125,
+          width: 140,
+          height: 100,
           type: STEP_TYPE_RECT,
-          gPosition: {'x': 0, 'y': 0},
+          gPosition: {'x': 0.0, 'y': 0.0},
           childs: [],
         )));
     updateUserData();
@@ -184,7 +197,7 @@ class PlanController extends GetxController {
     var rootStep = plan.tree;
 
     recursiveFind(step) {
-      if(step.id == id){
+      if (step.id == id) {
         return step;
       }
       for (int i = 0; i < step.childs.length; i++) {
@@ -197,5 +210,54 @@ class PlanController extends GetxController {
     }
 
     return recursiveFind(rootStep);
+  }
+
+  addStep(dataName, dataDesc, dataBackgroundColor, {type = STEP_TYPE_RECT}) {
+    int stepId = selectedStep.id;
+    var step = getStepById(stepId);
+    var stepPos = getPositionNewStep(step);
+
+    var stepNew = PlanTreeModel(
+      id: UniqueKey().hashCode,
+      name: dataName,
+      parentId: step.id,
+      gPosition: stepPos,
+      // {'x': 0, 'y': 80},
+      width: 140,
+      height: 100,
+      type: type,
+      childs: [],
+    );
+
+    step.childs.add(stepNew);
+    updateUserData();
+    update();
+  }
+
+  getPositionNewStep(PlanTreeModel parentStep) {
+    var pos = {'x': 150.0, 'y': -50.0};
+
+    if (parentStep.childs.isNotEmpty) {
+      int countStep = parentStep.childs.length;
+      switch (countStep) {
+        case 1:
+          parentStep.childs[0].gPosition = {'x': 150.0, 'y': -130.0};
+          pos = {'x': 150.0, 'y': 30.0};
+          break;
+        case 2:
+          parentStep.childs[0].gPosition = {'x': 150.0, 'y': -180.0};
+          parentStep.childs[1].gPosition = {'x': 150.0, 'y': -50.0};
+          pos = {'x': 150.0, 'y': 80.0};
+          break;
+        case 3:
+          parentStep.childs[0].gPosition = {'x': 150.0, 'y': -250.0};
+          parentStep.childs[1].gPosition = {'x': 150.0, 'y': -120.0};
+          parentStep.childs[2].gPosition = {'x': 150.0, 'y': 10.0};
+          pos = {'x': 150.0, 'y': 140.0};
+          break;
+      }
+    }
+
+    return pos;
   }
 }
