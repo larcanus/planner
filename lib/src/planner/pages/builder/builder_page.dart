@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:planner/src/planner/state_manager/plan_controller.dart';
 import 'package:planner/src/planner/state_manager/plan_item_list_model.dart';
-import 'dart:math';
 
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
@@ -83,17 +82,17 @@ class MyGame extends FlameGame
 
   @override
   Future<void> onLoad() async {
-    // onGameResize(Vector2(1000, 1500));
+    camera.speed = 450;
+    planController.canvasSizeDefault = Vector2(canvasSize.x, canvasSize.y);
     buildTree();
+    // onGameResize(Vector2(1000, 1500));
     // camera.viewport = FixedResolutionViewport(Vector2(400, 700));
     // camera.setRelativeOffset(Anchor.center);
-    camera.speed = 100;
-    // camera.worldBounds = Rect.fromLTWH(0, 0, worldWidth, worldHeight);
-    // var s = canvasSize;
+    //var s = canvasSize;
     // var d = viewportProjector;
     // var h = projector;
 
-    // var gg = camera.gameSize;
+    //var gg = camera.gameSize;
     // var zom = camera.zoom;
     // var zosm = FixedResolutionViewport;
   }
@@ -130,6 +129,7 @@ class MyGame extends FlameGame
   }
 
   void buildTree() {
+    dropWorldBounds();
     // добавляем рута
     createStep(plan.tree);
     buildBranch(plan.tree.childs);
@@ -201,13 +201,13 @@ class MyGame extends FlameGame
     bool isRootStep =
         stepData.gPosition['x'] == 0 && stepData.gPosition['y'] == 0;
     var posX = isRootStep
-        ? size.x / 2 - stepData.width / 2
-        : size.x / 2 + stepData.gPosition['x']!;
+        ? planController.canvasSizeDefault.x / 2 - stepData.width / 2
+        : planController.canvasSizeDefault.x / 2 + stepData.gPosition['x']!;
     var posY = isRootStep
-        ? size.y / 2 - stepData.height / 2
-        : size.y / 2 + stepData.gPosition['y']!;
+        ? planController.canvasSizeDefault.y / 2 - stepData.height / 2
+        : planController.canvasSizeDefault.y / 2 + stepData.gPosition['y']!;
 
-    setWorldBoundsMax(posX + 400, posY + 400);
+    setWorldBoundsMax(posX + 500, posY + 500);
     return Vector2(posX, posY);
   }
 
@@ -243,6 +243,11 @@ class MyGame extends FlameGame
   setWorldBoundsMax(width, height) {
     worldWidth = width > worldWidth ? width : worldWidth;
     worldHeight = height > worldHeight ? height : worldHeight;
+  }
+
+  dropWorldBounds() {
+    worldWidth = planController.canvasSizeDefault.x;
+    worldHeight = planController.canvasSizeDefault.y;
   }
 
   @override
@@ -340,7 +345,6 @@ class Step extends PositionComponent with Tappable {
     Vector2 centerWidgetScreenPos = Vector2(
         posWidgetGlobalX - camera.canvasSize.x / 2,
         posWidgetGlobalY - camera.canvasSize.y / 2);
-    camera.speed = 450;
     camera.moveTo(centerWidgetScreenPos);
 
     return true;

@@ -18,6 +18,8 @@ class PlanController extends GetxController {
   var _selectedPlan = null;
   var _componentsInGame = [];
 
+  var _canvasSizeDefault;
+
   get selectedTab => _selectedTab.value;
 
   set selectedTab(index) => _selectedTab.value = index;
@@ -47,6 +49,10 @@ class PlanController extends GetxController {
   get selectedPlan => _selectedPlan;
 
   set selectedPlan(plan) => _selectedPlan = plan;
+
+  get canvasSizeDefault => _canvasSizeDefault;
+
+  set canvasSizeDefault(size) => _canvasSizeDefault = size;
 
   void loadPlanItemModels() async {
     _itemListItemModel.clear();
@@ -193,67 +199,77 @@ class PlanController extends GetxController {
   }
 
   getStepById(int id) {
-    var plan = selectedPlan;
-    var rootStep = plan.tree;
+    PlanItemListModel plan = selectedPlan;
+    PlanTreeModel rootStep = plan.tree;
+    var findChild;
 
     recursiveFind(step) {
       if (step.id == id) {
-        return step;
+        findChild = step;
       }
       for (int i = 0; i < step.childs.length; i++) {
         PlanTreeModel child = step.childs[i];
         if (child.id == id) {
-          return child;
+          findChild = child;
+          break;
+        } else {
+          recursiveFind(child);
         }
-        recursiveFind(child);
       }
     }
-
-    return recursiveFind(rootStep);
+    recursiveFind(rootStep);
+    return findChild;
   }
 
   addStep(dataName, dataDesc, dataBackgroundColor, {type = STEP_TYPE_RECT}) {
     int stepId = selectedStep.id;
     var step = getStepById(stepId);
-    var stepPos = getPositionNewStep(step);
+    if (step != null) {
+      var stepPos = getPositionNewStep(step);
 
-    var stepNew = PlanTreeModel(
-      id: UniqueKey().hashCode,
-      name: dataName,
-      parentId: step.id,
-      gPosition: stepPos,
-      // {'x': 0, 'y': 80},
-      width: 140,
-      height: 100,
-      type: type,
-      childs: [],
-    );
+      var stepNew = PlanTreeModel(
+        id: UniqueKey().hashCode,
+        name: dataName,
+        parentId: step.id,
+        gPosition: stepPos,
+        width: 140,
+        height: 100,
+        type: type,
+        childs: [],
+      );
 
-    step.childs.add(stepNew);
-    updateUserData();
-    update();
+      step.childs.add(stepNew);
+      updateUserData();
+      update();
+    }
   }
 
-  getPositionNewStep(PlanTreeModel parentStep) {
+  getPositionNewStep(parentStep) {
+    var parentPos = parentStep.gPosition;
     var pos = {'x': 150.0, 'y': -50.0};
+    if (parentPos['x'] != null &&
+        parentPos['x'] != 0.0 &&
+        parentPos['y'] != 0.0) {
+      pos['x'] = pos['x']! + parentPos['x'] + 70.0;
+    }
 
     if (parentStep.childs.isNotEmpty) {
       int countStep = parentStep.childs.length;
       switch (countStep) {
         case 1:
-          parentStep.childs[0].gPosition = {'x': 150.0, 'y': -130.0};
-          pos = {'x': 150.0, 'y': 30.0};
+          parentStep.childs[0].gPosition = {'x': pos['x'], 'y': -130.0};
+          pos['y'] = 30.0;
           break;
         case 2:
-          parentStep.childs[0].gPosition = {'x': 150.0, 'y': -180.0};
-          parentStep.childs[1].gPosition = {'x': 150.0, 'y': -50.0};
-          pos = {'x': 150.0, 'y': 80.0};
+          parentStep.childs[0].gPosition = {'x': pos['x'], 'y': -180.0};
+          parentStep.childs[1].gPosition = {'x': pos['x'], 'y': -50.0};
+          pos['y'] = 80.0;
           break;
         case 3:
-          parentStep.childs[0].gPosition = {'x': 150.0, 'y': -250.0};
-          parentStep.childs[1].gPosition = {'x': 150.0, 'y': -120.0};
-          parentStep.childs[2].gPosition = {'x': 150.0, 'y': 10.0};
-          pos = {'x': 150.0, 'y': 140.0};
+          parentStep.childs[0].gPosition = {'x': pos['x'], 'y': -250.0};
+          parentStep.childs[1].gPosition = {'x': pos['x'], 'y': -120.0};
+          parentStep.childs[2].gPosition = {'x': pos['x'], 'y': 10.0};
+          pos['y'] = 140.0;
           break;
       }
     }

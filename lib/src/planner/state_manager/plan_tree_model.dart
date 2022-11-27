@@ -2,7 +2,7 @@ class PlanTreeModel {
   int id;
   String name;
   int parentId;
-  Map<String,double> gPosition;
+  Map gPosition;
   List childs;
   double width;
   String type;
@@ -30,13 +30,13 @@ class PlanTreeModel {
         childs = json['childs'];
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'name': name,
-    'parentId': parentId,
-    'gPosition': gPosition,
-    'width': width,
-    'height': height,
-    'type': type,
-    'childs': childs,
-  };
+        'id': id,
+        'name': name,
+        'parentId': parentId,
+        'gPosition': gPosition,
+        'width': width,
+        'height': height,
+        'type': type,
+        'childs': childs,
+      };
 }
