@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../constants.dart';
+
 class ConfirmDlg extends StatefulWidget {
   final String title, description;
   final Function? callbackCancel;
@@ -37,7 +39,7 @@ class _ConfirmDlgState extends State<ConfirmDlg> {
               Navigator.pop(context, true);
             }
           },
-          child: const Text('Cancel'),
+          child: const Text(CONFIRM_CANCEL_DLG),
         ),
         TextButton(
           onPressed: () {
@@ -47,7 +49,7 @@ class _ConfirmDlgState extends State<ConfirmDlg> {
               Navigator.pop(context, true);
             }
           },
-          child: const Text('OK'),
+          child: const Text(CONFIRM_OK_DLG),
         ),
       ],
     );

@@ -103,6 +103,7 @@ class PlanController extends GetxController {
     PlanTreeModel step = PlanTreeModel(
       id: stepData['id'],
       name: stepData['name'],
+      description: stepData['description'],
       parentId: stepData['parentId'],
       width: stepData['width'],
       height: stepData['height'],
@@ -148,6 +149,7 @@ class PlanController extends GetxController {
         tree: PlanTreeModel(
           id: UniqueKey().hashCode,
           name: NAME_ROOT_STEP,
+          description: '',
           parentId: 0,
           width: 140,
           height: 100,
@@ -227,6 +229,28 @@ class PlanController extends GetxController {
     return findChild;
   }
 
+  deleteStepByIdFromTree({id}) {
+    int idStep = id ?? selectedStepModel.id;
+    PlanItemListModel plan = selectedPlan;
+    PlanTreeModel rootStep = plan.tree;
+
+    recursiveFind(step) {
+      for (int i = 0; i < step.childs.length; i++) {
+        PlanTreeModel child = step.childs[i];
+        if (child.id == idStep) {
+          step.childs.removeAt(i);
+          break;
+        } else {
+          recursiveFind(child);
+        }
+      }
+    }
+
+    recursiveFind(rootStep);
+    updateUserData();
+    update();
+  }
+
   addStep(dataName, dataDesc, dataBackgroundColor, {type = STEP_TYPE_RECT}) {
     int stepId = selectedStep.id;
     var step = getStepById(stepId);
@@ -236,6 +260,7 @@ class PlanController extends GetxController {
       var stepNew = PlanTreeModel(
         id: UniqueKey().hashCode,
         name: dataName,
+        description: dataDesc,
         parentId: step.id,
         gPosition: stepPos,
         width: 140,
@@ -246,6 +271,18 @@ class PlanController extends GetxController {
 
       step.childs.add(stepNew);
       selectedStepModel = stepNew;
+      updateUserData();
+      update();
+    }
+  }
+
+  updateStepById(id, dataName, dataDesc, dataBackgroundColor,
+      {type = STEP_TYPE_RECT}) {
+    var step = getStepById(id);
+    if (step != null) {
+      step
+        ..name = dataName
+        ..description = dataDesc;
       updateUserData();
       update();
     }
@@ -294,14 +331,10 @@ class PlanController extends GetxController {
     });
   }
 
-  deleteStepById({id}){
+  deleteStepByIdFromComponentsCash({id}) {
     int idStep = id ?? selectedStepModel.id;
-    componentsInGame.removeWhere((comp) => comp.toString() == 'Step' && comp.id == idStep );
-    selectedStep = null;
-    var tree = selectedPlan.tree;
-    var stepp = getStepById(idStep);
-    print(';delete steppp');
-    updateUserData();
+    componentsInGame
+        .removeWhere((comp) => comp.toString() == 'Step' && comp.id == idStep);
     update();
   }
 }

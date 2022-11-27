@@ -55,9 +55,21 @@ const Map<int, List<Color>> COLORS_GRADIENT = {
 };
 
 const String PATH_NAME_USER_DATA = 'user_data';
-const String NAME_ROOT_STEP = 'Шаг №1';
 const String STEP_TYPE_RECT = 'rect';
 const String STEP_TYPE_CIRCLE = 'circle';
+
+// locale RU:
+const String ADD_EDIT_STEP_TITLE_DLG = 'Добавить новый шаг';
+const String ADD_EDIT_STEP_NAME_DLG = 'Наименование';
+const String ADD_EDIT_STEP_DESC_DLG = 'Краткое описание';
+const String ADD_EDIT_STEP_VALID_DLG = 'Это поле не должно быть пустым';
+const String ADD_EDIT_STEP_SAVE_DLG = 'Сохранить';
+const String CONFIRM_CANCEL_DLG = 'Отмена';
+const String CONFIRM_OK_DLG = 'Да';
+const String NAME_ROOT_STEP = 'Шаг №1';
+const String ALARM = 'Предупреждение';
+const String CONFIRM_DELETE_STEP =
+    'Вы действительно хотите удалить этот шаг? Будут удалены и все последующие шаги!';
 
 const Color COLOR_BUTTONS_STEP = Color(0xFF0C7391);
 const Color COLOR_LINE_BRANCH_STEPS = Color(0xFF021E26);

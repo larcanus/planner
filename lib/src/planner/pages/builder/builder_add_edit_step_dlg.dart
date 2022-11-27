@@ -8,10 +8,15 @@ import 'builder_page.dart';
 
 class StepEditDlg extends StatefulWidget {
   final String? title, description;
+  final int? stepId;
   final MyGame game;
 
   const StepEditDlg(
-      {required Key key, required this.game, this.title, this.description})
+      {required Key key,
+      required this.game,
+      this.title,
+      this.description,
+      this.stepId})
       : super(key: key);
 
   @override
@@ -28,11 +33,13 @@ class _StepEditDlgState extends State<StepEditDlg> {
 
   late final String? title;
   late final String? description;
+  late final int? stepId;
 
   @override
   initState() {
     title = widget.title;
     description = widget.description;
+    stepId = widget.stepId;
 
     _textFormTitleController.text = title ?? '';
     _textFormDescController.text = description ?? '';
@@ -83,7 +90,7 @@ class _StepEditDlgState extends State<StepEditDlg> {
           child: Column(
             children: <Widget>[
               const Text(
-                'Добавить новый шаг',
+                ADD_EDIT_STEP_TITLE_DLG,
                 style: TextStyle(fontSize: 23),
               ),
               sizedBoxSpace,
@@ -95,12 +102,12 @@ class _StepEditDlgState extends State<StepEditDlg> {
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(5.0)),
                       borderSide: BorderSide(color: Colors.blue)),
-                  labelText: 'Наименование',
+                  labelText: ADD_EDIT_STEP_NAME_DLG,
                 ),
                 keyboardType: TextInputType.text,
                 validator: (String? value) {
                   if (value == null || value.isEmpty) {
-                    return 'Это поле не должно быть пустым';
+                    return ADD_EDIT_STEP_VALID_DLG;
                   }
                   return null;
                 },
@@ -116,7 +123,7 @@ class _StepEditDlgState extends State<StepEditDlg> {
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(5.0)),
                       borderSide: BorderSide(color: Colors.blue)),
-                  labelText: 'Краткое описание',
+                  labelText: ADD_EDIT_STEP_DESC_DLG,
                 ),
                 controller: _textFormDescController,
               ),
@@ -129,20 +136,25 @@ class _StepEditDlgState extends State<StepEditDlg> {
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    // if (id == null) {
-                    planController.addStep(_textFormTitleController.text,
-                        _textFormDescController.text, currentColor.value);
-                    // } else {
-                    // planController.updateItemListById(id, _textFormTitleController.text,
-                    //     _textFormDescController.text, currentColor.value);
-                    // }
-                    widget.game.overlays.remove('addStepOverlay');
-                    widget.game.overlays.remove('buttonsStep');
+                    if (stepId == null) {
+                      planController.addStep(_textFormTitleController.text,
+                          _textFormDescController.text, currentColor.value);
+                      widget.game.overlays.remove('addStepOverlay');
+
+                    } else {
+                      planController.updateStepById(
+                          stepId,
+                          _textFormTitleController.text,
+                          _textFormDescController.text,
+                          currentColor.value);
+                      widget.game.overlays.remove('editStepOverlay');
+                    }
                     widget.game.refreshTree();
                     planController.selectStepById();
+                    widget.game.overlays.remove('buttonsStep');
                   }
                 },
-                child: const Text('Сохранить'),
+                child: const Text(ADD_EDIT_STEP_SAVE_DLG),
               ),
             ],
           ),

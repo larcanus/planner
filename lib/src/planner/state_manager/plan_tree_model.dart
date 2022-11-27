@@ -1,6 +1,7 @@
 class PlanTreeModel {
   int id;
   String name;
+  String description;
   int parentId;
   Map gPosition;
   List childs;
@@ -11,6 +12,7 @@ class PlanTreeModel {
   PlanTreeModel({
     required this.id,
     required this.name,
+    required this.description,
     required this.parentId,
     required this.gPosition,
     required this.width,
@@ -22,6 +24,7 @@ class PlanTreeModel {
   PlanTreeModel.fromJson(Map<String, dynamic> json)
       : id = json['id'],
         name = json['name'],
+        description = json['description'],
         parentId = json['parentId'],
         gPosition = json['gPosition'],
         width = json['width'],
@@ -32,6 +35,7 @@ class PlanTreeModel {
   Map<String, dynamic> toJson() => {
         'id': id,
         'name': name,
+        'description': description,
         'parentId': parentId,
         'gPosition': gPosition,
         'width': width,

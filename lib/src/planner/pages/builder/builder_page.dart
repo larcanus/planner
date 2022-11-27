@@ -11,7 +11,7 @@ import 'package:planner/src/planner/state_manager/plan_tree_model.dart';
 
 import '../../constants.dart';
 import '../plans_list/confirm_dlg.dart';
-import 'builder_add_step_dlg.dart';
+import 'builder_add_edit_step_dlg.dart';
 
 class BuilderPage extends StatelessWidget {
   final int selectPlanId;
@@ -45,7 +45,9 @@ class BuilderPage extends StatelessWidget {
                       ),
                       FloatingActionButton(
                         heroTag: 'btn2',
-                        onPressed: () {},
+                        onPressed: () {
+                          game.overlays.add('editStepOverlay');
+                        },
                         backgroundColor: Colors.green,
                         child: const Icon(size: 35, Icons.edit_note),
                       ),
@@ -66,13 +68,26 @@ class BuilderPage extends StatelessWidget {
         'deleteStepOverlay': (BuildContext context, MyGame game) {
           return ConfirmDlg(
               key: UniqueKey(),
-              title: 'Предупреждение',
-              description: 'Вы действительно хотите удалить этот шаг?',
+              title: ALARM,
+              description: CONFIRM_DELETE_STEP,
               callbackOk: () {
-                planListController.deleteStepById();
                 game.overlays.remove('deleteStepOverlay');
+                planListController.selectedStep = null;
+                planListController.deleteStepByIdFromTree();
+                game.refreshTree();
+                planListController.deleteStepByIdFromComponentsCash();
               },
               callbackCancel: () => game.overlays.remove('deleteStepOverlay'));
+        },
+        'editStepOverlay': (BuildContext context, MyGame game) {
+          PlanTreeModel selectedStepModel =
+              planListController.selectedStepModel;
+          return StepEditDlg(
+              key: UniqueKey(),
+              game: game,
+              stepId: selectedStepModel.id,
+              title: selectedStepModel.name,
+              description: selectedStepModel.description);
         }
       }),
     );
@@ -192,19 +207,16 @@ class MyGame extends FlameGame
     planController.componentsInGame.add(stepLine);
 
     // добавляем текст форму с сокращенным описанием шага
-    final regularTextStyle =
-        TextStyle(fontSize: 18, color: BasicPalette.green.color);
-    final regular = TextPaint(style: regularTextStyle);
-    var gPosTextX = gVectorPosStep.x + step.width / 2;
-    var gPosTextY = gVectorPosStep.y + step.height / 2;
 
-    Vector2 gVectorPosText = Vector2(gPosTextX, gPosTextY);
-    TextComponent textStep = TextComponent(
-        text: stepData.name,
-        textRenderer: regular,
-        anchor: Anchor.center,
-        position: gVectorPosText);
+    // var gPosTextX = gVectorPosStep.x + step.width / 2;
+    // var gPosTextY = gVectorPosStep.y + step.height / 2;
+    //
+    // Vector2 gVectorPosText = Vector2(gPosTextX, gPosTextY);
+    TextComponent textStep = TextBoxStep(
+        stepData.name, gVectorPosStep, Vector2(step.width, step.height));
+
     add(textStep);
+
     planController.componentsInGame.add(textStep);
   }
 
@@ -441,5 +453,37 @@ class StepTools extends PositionComponent with Tappable {
     removeFromParent();
     info.handled = true;
     return true;
+  }
+}
+
+class TextBoxStep extends TextBoxComponent {
+  TextBoxStep(
+    String text,
+    Vector2 position,
+    size, {
+    double? timePerChar,
+    double? margins,
+  }) : super(
+          position: position,
+          text: text,
+          size: size,
+          align: Anchor.center,
+          textRenderer: TextPaint(
+              style: TextStyle(
+            fontSize: 18,
+            color: BasicPalette.green.color,
+          )),
+          boxConfig: TextBoxConfig(
+            maxWidth: 180,
+            growingBox: true,
+            margins: EdgeInsets.all(margins ?? 25),
+          ),
+        );
+
+  @override
+  void render(Canvas c) {
+    final rect = Rect.fromLTWH(0, 0, width, height);
+    c.drawRect(rect, Paint()..color = Colors.white10);
+    super.render(c);
   }
 }
