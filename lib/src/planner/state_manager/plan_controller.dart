@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:planner/src/planner/pages/builder/builder_page.dart';
 import 'package:planner/src/planner/pages/plans_list/plan_item_list_widget.dart';
+import 'package:planner/src/planner/pages/builder/builder_page.dart';
 import 'package:planner/src/planner/state_manager/plan_item_list_model.dart';
 import 'package:planner/src/planner/state_manager/plan_tree_model.dart';
 import '../constants.dart';
@@ -15,6 +15,7 @@ class PlanController extends GetxController {
   var _currentActiveModelName = 'Нет активного плана'.obs;
   var _selectedStepTools = null;
   var _selectedStep = null;
+  var _selectedStepModel = null;
   var _selectedPlan = null;
   var _componentsInGame = [];
 
@@ -43,6 +44,10 @@ class PlanController extends GetxController {
   get selectedStep => _selectedStep;
 
   set selectedStep(step) => _selectedStep = step;
+
+  get selectedStepModel => _selectedStepModel;
+
+  set selectedStepModel(step) => _selectedStepModel = step;
 
   get componentsInGame => _componentsInGame;
 
@@ -217,6 +222,7 @@ class PlanController extends GetxController {
         }
       }
     }
+
     recursiveFind(rootStep);
     return findChild;
   }
@@ -239,6 +245,7 @@ class PlanController extends GetxController {
       );
 
       step.childs.add(stepNew);
+      selectedStepModel = stepNew;
       updateUserData();
       update();
     }
@@ -275,5 +282,26 @@ class PlanController extends GetxController {
     }
 
     return pos;
+  }
+
+  selectStepById({id}) {
+    int idStep = id ?? selectedStepModel.id;
+    componentsInGame.forEach((comp) {
+      if (comp.toString() == 'Step' && comp.id == idStep) {
+        comp.selectStep();
+        comp.handlerButtonsStep();
+      }
+    });
+  }
+
+  deleteStepById({id}){
+    int idStep = id ?? selectedStepModel.id;
+    componentsInGame.removeWhere((comp) => comp.toString() == 'Step' && comp.id == idStep );
+    selectedStep = null;
+    var tree = selectedPlan.tree;
+    var stepp = getStepById(idStep);
+    print(';delete steppp');
+    updateUserData();
+    update();
   }
 }

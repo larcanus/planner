@@ -10,6 +10,7 @@ import 'package:flame/palette.dart';
 import 'package:planner/src/planner/state_manager/plan_tree_model.dart';
 
 import '../../constants.dart';
+import '../plans_list/confirm_dlg.dart';
 import 'builder_add_step_dlg.dart';
 
 class BuilderPage extends StatelessWidget {
@@ -36,7 +37,9 @@ class BuilderPage extends StatelessWidget {
                     children: [
                       FloatingActionButton(
                         heroTag: 'btn1',
-                        onPressed: () {},
+                        onPressed: () {
+                          game.overlays.add('deleteStepOverlay');
+                        },
                         backgroundColor: Colors.green,
                         child: const Icon(size: 28, Icons.delete),
                       ),
@@ -49,9 +52,6 @@ class BuilderPage extends StatelessWidget {
                       FloatingActionButton(
                         heroTag: 'btn3',
                         onPressed: () {
-                          print(this);
-                          print(game);
-                          // game.buildTree();
                           game.overlays.add('addStepOverlay');
                         },
                         backgroundColor: Colors.green,
@@ -62,6 +62,17 @@ class BuilderPage extends StatelessWidget {
         },
         'addStepOverlay': (BuildContext context, MyGame game) {
           return StepEditDlg(key: UniqueKey(), game: game);
+        },
+        'deleteStepOverlay': (BuildContext context, MyGame game) {
+          return ConfirmDlg(
+              key: UniqueKey(),
+              title: 'Предупреждение',
+              description: 'Вы действительно хотите удалить этот шаг?',
+              callbackOk: () {
+                planListController.deleteStepById();
+                game.overlays.remove('deleteStepOverlay');
+              },
+              callbackCancel: () => game.overlays.remove('deleteStepOverlay'));
         }
       }),
     );
@@ -253,9 +264,9 @@ class MyGame extends FlameGame
   @override
   void onTapDown(int pointerId, TapDownInfo info) {
     super.onTapDown(pointerId, info);
-    print('widget----${info.eventPosition.widget}');
-    print('global---${info.eventPosition.global}');
-    print('game---${info.eventPosition.game}');
+    // print('widget----${info.eventPosition.widget}');
+    // print('global---${info.eventPosition.global}');
+    // print('game---${info.eventPosition.game}');
     // print('camera.position gg ---- ${camera.position}');
     if (overlays.isActive('addStepOverlay')) {
       overlays.remove('addStepOverlay');
@@ -301,27 +312,31 @@ class Step extends PositionComponent with Tappable {
     // print('stepPosition.x----${position}');
 
     if (!info.handled) {
-      final touchPoint = Vector2(0, 0);
-      Vector2 sizeTools = Vector2(squareWidth, squareHeight);
-      double posWidgetGlobalX = position.x + squareWidth / 2;
-      double posWidgetGlobalY = position.y + squareHeight / 2;
-      Vector2 centerWidgetScreenPos = Vector2(
-          posWidgetGlobalX - camera.canvasSize.x / 2,
-          posWidgetGlobalY - camera.canvasSize.y / 2);
-      camera.speed = 450;
-      camera.moveTo(centerWidgetScreenPos);
-      StepTools stepTools = StepTools(position: touchPoint, size: sizeTools);
-      add(stepTools);
-
-      final selectedStepTools = planController.selectedStepTools;
-      if (selectedStepTools != null) {
-        selectedStepTools.removeFromParent();
-      }
-      planController.selectedStepTools = stepTools;
-      planController.selectedStep = this;
+      selectStep();
     }
     handlerButtonsStep();
     return true;
+  }
+
+  selectStep() {
+    final touchPoint = Vector2(0, 0);
+    Vector2 sizeTools = Vector2(squareWidth, squareHeight);
+    double posWidgetGlobalX = position.x + squareWidth / 2;
+    double posWidgetGlobalY = position.y + squareHeight / 2;
+    Vector2 centerWidgetScreenPos = Vector2(
+        posWidgetGlobalX - planController.canvasSizeDefault.x / 2,
+        posWidgetGlobalY - planController.canvasSizeDefault.y / 2);
+    camera.moveTo(centerWidgetScreenPos);
+    StepTools stepTools = StepTools(position: touchPoint, size: sizeTools);
+    add(stepTools);
+
+    final selectedStepTools = planController.selectedStepTools;
+    if (selectedStepTools != null) {
+      selectedStepTools.removeFromParent();
+    }
+    planController.selectedStepTools = stepTools;
+    planController.selectedStep = this;
+    planController.selectedStepModel = planController.getStepById(id);
   }
 
   handlerButtonsStep() {
@@ -348,6 +363,11 @@ class Step extends PositionComponent with Tappable {
     camera.moveTo(centerWidgetScreenPos);
 
     return true;
+  }
+
+  @override
+  String toString() {
+    return 'Step';
   }
 }
 

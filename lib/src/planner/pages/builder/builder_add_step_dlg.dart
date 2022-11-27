@@ -21,7 +21,8 @@ class StepEditDlg extends StatefulWidget {
 class _StepEditDlgState extends State<StepEditDlg> {
   final _formKey = GlobalKey<FormState>();
   final PlanController planController = Get.find();
-  final TextEditingController _textFormTitleController = TextEditingController();
+  final TextEditingController _textFormTitleController =
+      TextEditingController();
   final TextEditingController _textFormDescController = TextEditingController();
   Color currentColor = const Color(0xffb599d6);
 
@@ -57,9 +58,9 @@ class _StepEditDlgState extends State<StepEditDlg> {
   contentBox(context) {
     const sizedBoxSpace = SizedBox(height: 14);
 
-    List<Color> getColorConstant(){
-      List<Color> colors= [];
-      for(var item in COLORS_GRADIENT.entries){
+    List<Color> getColorConstant() {
+      List<Color> colors = [];
+      for (var item in COLORS_GRADIENT.entries) {
         colors.add(Color(item.key));
       }
       return colors;
@@ -129,14 +130,16 @@ class _StepEditDlgState extends State<StepEditDlg> {
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     // if (id == null) {
-                      planController.addStep(_textFormTitleController.text,
-                          _textFormDescController.text, currentColor.value);
+                    planController.addStep(_textFormTitleController.text,
+                        _textFormDescController.text, currentColor.value);
                     // } else {
-                      // planController.updateItemListById(id, _textFormTitleController.text,
-                      //     _textFormDescController.text, currentColor.value);
+                    // planController.updateItemListById(id, _textFormTitleController.text,
+                    //     _textFormDescController.text, currentColor.value);
                     // }
                     widget.game.overlays.remove('addStepOverlay');
+                    widget.game.overlays.remove('buttonsStep');
                     widget.game.refreshTree();
+                    planController.selectStepById();
                   }
                 },
                 child: const Text('Сохранить'),
