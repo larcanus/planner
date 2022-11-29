@@ -1,9 +1,10 @@
+import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:planner/src/planner/pages/plans_list/plan_item_list_widget.dart';
-import 'package:planner/src/planner/pages/builder/builder_page.dart';
 import 'package:planner/src/planner/state_manager/plan_item_list_model.dart';
-import 'package:planner/src/planner/state_manager/plan_tree_model.dart';
+import 'package:planner/src/planner/state_manager/step_model.dart';
+import 'package:planner/src/planner/utils.dart';
 import '../constants.dart';
 import '../file_manager.dart';
 
@@ -19,7 +20,7 @@ class PlanController extends GetxController {
   var _selectedPlan = null;
   var _componentsInGame = [];
 
-  var _canvasSizeDefault;
+  late Vector2 _canvasSizeDefault;
 
   get selectedTab => _selectedTab.value;
 
@@ -81,7 +82,7 @@ class PlanController extends GetxController {
 
     for (int i = 0; i < eternalDataPLan.length; i++) {
       final item = eternalDataPLan[i];
-      PlanTreeModel tree = getTreeStructureFromJson(item['tree']);
+      StepModel tree = getTreeStructureFromJson(item['tree']);
 
       final planItemModel = PlanItemListModel(
           id: item['id'],
@@ -100,10 +101,11 @@ class PlanController extends GetxController {
   }
 
   getTreeStructureFromJson(stepData) {
-    PlanTreeModel step = PlanTreeModel(
+    StepModel step = StepModel(
       id: stepData['id'],
       name: stepData['name'],
       description: stepData['description'],
+      background: stepData['background'],
       parentId: stepData['parentId'],
       width: stepData['width'],
       height: stepData['height'],
@@ -146,10 +148,11 @@ class PlanController extends GetxController {
         planeName: dataName,
         planeDesc: dataDesc,
         backgroundColor: dataBackgroundColor,
-        tree: PlanTreeModel(
+        tree: StepModel(
           id: UniqueKey().hashCode,
           name: NAME_ROOT_STEP,
           description: '',
+          background: DEFAULT_BACKGROUND_STEP.toHex(),
           parentId: 0,
           width: 140,
           height: 100,
@@ -207,7 +210,7 @@ class PlanController extends GetxController {
 
   getStepById(int id) {
     PlanItemListModel plan = selectedPlan;
-    PlanTreeModel rootStep = plan.tree;
+    StepModel rootStep = plan.tree;
     var findChild;
 
     recursiveFind(step) {
@@ -215,7 +218,7 @@ class PlanController extends GetxController {
         findChild = step;
       }
       for (int i = 0; i < step.childs.length; i++) {
-        PlanTreeModel child = step.childs[i];
+        StepModel child = step.childs[i];
         if (child.id == id) {
           findChild = child;
           break;
@@ -232,11 +235,11 @@ class PlanController extends GetxController {
   deleteStepByIdFromTree({id}) {
     int idStep = id ?? selectedStepModel.id;
     PlanItemListModel plan = selectedPlan;
-    PlanTreeModel rootStep = plan.tree;
+    StepModel rootStep = plan.tree;
 
     recursiveFind(step) {
       for (int i = 0; i < step.childs.length; i++) {
-        PlanTreeModel child = step.childs[i];
+        StepModel child = step.childs[i];
         if (child.id == idStep) {
           step.childs.removeAt(i);
           break;
@@ -257,10 +260,11 @@ class PlanController extends GetxController {
     if (step != null) {
       var stepPos = getPositionNewStep(step);
 
-      var stepNew = PlanTreeModel(
+      var stepNew = StepModel(
         id: UniqueKey().hashCode,
         name: dataName,
         description: dataDesc,
+        background: dataBackgroundColor,
         parentId: step.id,
         gPosition: stepPos,
         width: 140,
@@ -282,7 +286,8 @@ class PlanController extends GetxController {
     if (step != null) {
       step
         ..name = dataName
-        ..description = dataDesc;
+        ..description = dataDesc
+        ..background = dataBackgroundColor;
       updateUserData();
       update();
     }

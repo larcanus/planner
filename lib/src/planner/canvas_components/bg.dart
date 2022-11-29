@@ -8,7 +8,7 @@ class BG extends PositionComponent with Tappable {
   late final FlameGame game;
   late Svg svgInstance;
 
-  var svgCopm;
+  late final SvgComponent svgCopm;
 
   BG(this.game, position) : super(position: position);
 
@@ -31,15 +31,11 @@ class BG extends PositionComponent with Tappable {
   }
   @override
   void render(Canvas canvas) {
-
-
-    final position = Vector2(100, 100);
-    final size = Vector2(300, 300);
     svgInstance.renderPosition(canvas, Vector2(100, 200), Vector2.all(300));
 
     bgSprite.renderRect(
         canvas,
-        Rect.fromLTWH(
+        const Rect.fromLTWH(
           0.0,
           123,
           119,

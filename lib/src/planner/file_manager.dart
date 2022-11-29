@@ -5,8 +5,8 @@ import 'package:path_provider/path_provider.dart';
 
 
 Future<List> getUserData() async {
-  String ADDPath = await getADDPath();
-  String wholePath = '$ADDPath/$PATH_NAME_USER_DATA';
+  String appDocumDirPath = await getADDPath();
+  String wholePath = '$appDocumDirPath/$PATH_NAME_USER_DATA';
   bool isExists = await File(wholePath).exists();
 
   if( isExists ){
@@ -18,11 +18,9 @@ Future<List> getUserData() async {
 }
 
 void createUserData(data) async {
-  String ADDPath = await getADDPath();
-  String wholePath = '$ADDPath/$PATH_NAME_USER_DATA';
-  var encodedata = json.encode(data);
-
-  writeFile(wholePath, encodedata);
+  String appDocumDirPath = await getADDPath();
+  String wholePath = '$appDocumDirPath/$PATH_NAME_USER_DATA';
+  writeFile(wholePath, json.encode(data));
 }
 
 Future<String> getADDPath() async {

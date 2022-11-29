@@ -1,4 +1,4 @@
-import 'package:planner/src/planner/state_manager/plan_tree_model.dart';
+import 'package:planner/src/planner/state_manager/step_model.dart';
 
 class PlanItemListModel {
   int id;
@@ -6,7 +6,7 @@ class PlanItemListModel {
   String planeDesc;
   int backgroundColor;
   bool isActive;
-  PlanTreeModel tree;
+  StepModel tree;
 
   PlanItemListModel(
       {required this.id,

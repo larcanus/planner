@@ -1,21 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:get/get.dart';
+import 'package:planner/src/planner/utils.dart';
 
 import '../../constants.dart';
 import '../../state_manager/plan_controller.dart';
 import 'builder_page.dart';
 
 class StepEditDlg extends StatefulWidget {
-  final String? title, description;
+  final String title;
+  final String background;
+  final String? description, name;
   final int? stepId;
   final MyGame game;
 
   const StepEditDlg(
       {required Key key,
       required this.game,
-      this.title,
+      required this.title,
+      this.name,
       this.description,
+      this.background = '#ff33beff',
       this.stepId})
       : super(key: key);
 
@@ -29,19 +34,21 @@ class _StepEditDlgState extends State<StepEditDlg> {
   final TextEditingController _textFormTitleController =
       TextEditingController();
   final TextEditingController _textFormDescController = TextEditingController();
-  Color currentColor = const Color(0xffb599d6);
 
-  late final String? title;
-  late final String? description;
+
+  late final String title;
+  late Color currentColor;
+  late final String? name, description;
   late final int? stepId;
 
   @override
   initState() {
     title = widget.title;
+    name = widget.name;
+    currentColor = HexColor.fromHex(widget.background);
     description = widget.description;
     stepId = widget.stepId;
-
-    _textFormTitleController.text = title ?? '';
+    _textFormTitleController.text = name ?? '';
     _textFormDescController.text = description ?? '';
     super.initState();
   }
@@ -67,8 +74,8 @@ class _StepEditDlgState extends State<StepEditDlg> {
 
     List<Color> getColorConstant() {
       List<Color> colors = [];
-      for (var item in COLORS_GRADIENT.entries) {
-        colors.add(Color(item.key));
+      for (var item in COLORS_STEP_PALETTE) {
+        colors.add(item);
       }
       return colors;
     }
@@ -89,9 +96,9 @@ class _StepEditDlgState extends State<StepEditDlg> {
         child: SingleChildScrollView(
           child: Column(
             children: <Widget>[
-              const Text(
-                ADD_EDIT_STEP_TITLE_DLG,
-                style: TextStyle(fontSize: 23),
+              Text(
+                title,
+                style: const TextStyle(fontSize: 23),
               ),
               sizedBoxSpace,
               TextFormField(
@@ -101,7 +108,7 @@ class _StepEditDlgState extends State<StepEditDlg> {
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                      borderSide: BorderSide(color: Colors.blue)),
+                      borderSide: BorderSide(color: COLOR_BORDER_EDIT_STEP_DLG)),
                   labelText: ADD_EDIT_STEP_NAME_DLG,
                 ),
                 keyboardType: TextInputType.text,
@@ -122,7 +129,7 @@ class _StepEditDlgState extends State<StepEditDlg> {
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                      borderSide: BorderSide(color: Colors.blue)),
+                      borderSide: BorderSide(color: COLOR_BORDER_EDIT_STEP_DLG)),
                   labelText: ADD_EDIT_STEP_DESC_DLG,
                 ),
                 controller: _textFormDescController,
@@ -138,15 +145,14 @@ class _StepEditDlgState extends State<StepEditDlg> {
                   if (_formKey.currentState!.validate()) {
                     if (stepId == null) {
                       planController.addStep(_textFormTitleController.text,
-                          _textFormDescController.text, currentColor.value);
+                          _textFormDescController.text, currentColor.toHex());
                       widget.game.overlays.remove('addStepOverlay');
-
                     } else {
                       planController.updateStepById(
                           stepId,
                           _textFormTitleController.text,
                           _textFormDescController.text,
-                          currentColor.value);
+                          currentColor.toHex());
                       widget.game.overlays.remove('editStepOverlay');
                     }
                     widget.game.refreshTree();

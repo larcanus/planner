@@ -1,3 +1,4 @@
+import 'package:flame/collisions.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:planner/src/planner/state_manager/plan_controller.dart';
@@ -7,9 +8,10 @@ import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flame/input.dart';
 import 'package:flame/palette.dart';
-import 'package:planner/src/planner/state_manager/plan_tree_model.dart';
+import 'package:planner/src/planner/state_manager/step_model.dart';
 
 import '../../constants.dart';
+import '../../utils.dart';
 import '../plans_list/confirm_dlg.dart';
 import 'builder_add_edit_step_dlg.dart';
 
@@ -62,9 +64,6 @@ class BuilderPage extends StatelessWidget {
                     ]))
           ]);
         },
-        'addStepOverlay': (BuildContext context, MyGame game) {
-          return StepEditDlg(key: UniqueKey(), game: game);
-        },
         'deleteStepOverlay': (BuildContext context, MyGame game) {
           return ConfirmDlg(
               key: UniqueKey(),
@@ -80,15 +79,21 @@ class BuilderPage extends StatelessWidget {
               callbackCancel: () => game.overlays.remove('deleteStepOverlay'));
         },
         'editStepOverlay': (BuildContext context, MyGame game) {
-          PlanTreeModel selectedStepModel =
+          StepModel selectedStepModel =
               planListController.selectedStepModel;
           return StepEditDlg(
               key: UniqueKey(),
               game: game,
               stepId: selectedStepModel.id,
-              title: selectedStepModel.name,
-              description: selectedStepModel.description);
-        }
+              title: EDIT_STEP_TITLE_DLG,
+              name: selectedStepModel.name,
+              description: selectedStepModel.description,
+              background: selectedStepModel.background,
+          );
+        },
+        'addStepOverlay': (BuildContext context, MyGame game) {
+          return StepEditDlg(key: UniqueKey(), game: game, title: ADD_STEP_TITLE_DLG,);
+        },
       }),
     );
   }
@@ -97,6 +102,8 @@ class BuilderPage extends StatelessWidget {
 class MyGame extends FlameGame
     with HasTappables, ScrollDetector, ScaleDetector {
   PlanItemListModel plan;
+  static const zoomPerScrollUnit = 0.02;
+  late double startZoom;
   late double worldWidth = size.x;
   late double worldHeight = size.y;
   final PlanController planController = Get.find();
@@ -104,7 +111,7 @@ class MyGame extends FlameGame
   MyGame(this.plan);
 
   @override
-  Color backgroundColor() => const Color(0xffD3D3D3);
+  Color backgroundColor() => DEFAULT_BACKGROUND_BUILDER;
 
   @override
   Future<void> onLoad() async {
@@ -114,11 +121,10 @@ class MyGame extends FlameGame
     // onGameResize(Vector2(1000, 1500));
     // camera.viewport = FixedResolutionViewport(Vector2(400, 700));
     // camera.setRelativeOffset(Anchor.center);
-    //var s = canvasSize;
+    // var s = canvasSize;
     // var d = viewportProjector;
     // var h = projector;
-
-    //var gg = camera.gameSize;
+    // var gg = camera.gameSize;
     // var zom = camera.zoom;
     // var zosm = FixedResolutionViewport;
   }
@@ -127,15 +133,11 @@ class MyGame extends FlameGame
     camera.zoom = camera.zoom.clamp(0.05, 3.0);
   }
 
-  static const zoomPerScrollUnit = 0.02;
-
   @override
   void onScroll(PointerScrollInfo info) {
     camera.zoom += info.scrollDelta.game.y.sign * zoomPerScrollUnit;
     clampZoom();
   }
-
-  late double startZoom;
 
   @override
   void onScaleStart(info) {
@@ -173,14 +175,11 @@ class MyGame extends FlameGame
     }
   }
 
-  void createStep(PlanTreeModel stepData) {
+  void createStep(StepModel stepData) {
     var parent = planController.getStepById(stepData.parentId);
     Vector2 gVectorPosStep = getGlobalPosStep(stepData);
     bool isRootStep =
         stepData.gPosition['x'] == 0 && stepData.gPosition['y'] == 0;
-
-    // print('stepData.parentId  ${stepData.parentId}');
-    // print('parent  ${parent}');
 
     // добавляем шаг
     Step step = Step(
@@ -207,13 +206,12 @@ class MyGame extends FlameGame
     planController.componentsInGame.add(stepLine);
 
     // добавляем текст форму с сокращенным описанием шага
-
     // var gPosTextX = gVectorPosStep.x + step.width / 2;
     // var gPosTextY = gVectorPosStep.y + step.height / 2;
     //
     // Vector2 gVectorPosText = Vector2(gPosTextX, gPosTextY);
     TextComponent textStep = TextBoxStep(
-        stepData.name, gVectorPosStep, Vector2(step.width, step.height));
+        stepData.name, gVectorPosStep, stepData.background, Vector2(step.width, step.height));
 
     add(textStep);
 
@@ -255,7 +253,7 @@ class MyGame extends FlameGame
     return Vector2(xPosCenter, yPosCenter);
   }
 
-  refreshTree() {
+  void refreshTree() {
     var allComponents = planController.componentsInGame;
     allComponents.forEach((comp) {
       comp.removeFromParent();
@@ -263,12 +261,12 @@ class MyGame extends FlameGame
     buildTree();
   }
 
-  setWorldBoundsMax(width, height) {
+  void setWorldBoundsMax(width, height) {
     worldWidth = width > worldWidth ? width : worldWidth;
     worldHeight = height > worldHeight ? height : worldHeight;
   }
 
-  dropWorldBounds() {
+  void dropWorldBounds() {
     worldWidth = planController.canvasSizeDefault.x;
     worldHeight = planController.canvasSizeDefault.y;
   }
@@ -283,10 +281,13 @@ class MyGame extends FlameGame
     if (overlays.isActive('addStepOverlay')) {
       overlays.remove('addStepOverlay');
     }
+    if (overlays.isActive('editStepOverlay')) {
+      overlays.remove('editStepOverlay');
+    }
   }
 }
 
-class Step extends PositionComponent with Tappable {
+class Step extends PositionComponent with Tappable, CollisionCallbacks {
   int id;
   double squareWidth = 100.0;
   double squareHeight = 100.0;
@@ -301,8 +302,6 @@ class Step extends PositionComponent with Tappable {
       required this.camera})
       : super(position: position);
   static Paint white = BasicPalette.white.paint();
-
-  get overlays => null;
 
   @override
   void render(Canvas canvas) {
@@ -330,7 +329,7 @@ class Step extends PositionComponent with Tappable {
     return true;
   }
 
-  selectStep() {
+  void selectStep() {
     final touchPoint = Vector2(0, 0);
     Vector2 sizeTools = Vector2(squareWidth, squareHeight);
     double posWidgetGlobalX = position.x + squareWidth / 2;
@@ -351,7 +350,7 @@ class Step extends PositionComponent with Tappable {
     planController.selectedStepModel = planController.getStepById(id);
   }
 
-  handlerButtonsStep() {
+  void handlerButtonsStep() {
     Game? game = findGame();
     var over = game?.overlays;
     Step? selectedStep = planController.selectedStep;
@@ -380,6 +379,12 @@ class Step extends PositionComponent with Tappable {
   @override
   String toString() {
     return 'Step';
+  }
+
+
+  @override
+  onCollision(Set<Vector2> intersectionPoints, PositionComponent other){
+
   }
 }
 
@@ -412,13 +417,13 @@ class StepLine extends PositionComponent {
     stylePaint
       ..strokeWidth = STROKE_BORDER_STEP_TOOLS
       ..style = PaintingStyle.stroke
-      ..color = COLOR_BORDER_STEP_TOOLS
+      ..color = COLOR_LINE_BRANCH_STEPS
       ..strokeWidth = 2;
 
     canvas.drawPath(_path, stylePaint);
   }
 
-  buildPath() {
+  void buildPath() {
     _path
       ..moveTo(0, 0)
       ..lineTo(positionEnd.x, positionEnd.y);
@@ -457,9 +462,12 @@ class StepTools extends PositionComponent with Tappable {
 }
 
 class TextBoxStep extends TextBoxComponent {
+  String background;
+
   TextBoxStep(
     String text,
     Vector2 position,
+    this.background,
     size, {
     double? timePerChar,
     double? margins,
@@ -469,9 +477,9 @@ class TextBoxStep extends TextBoxComponent {
           size: size,
           align: Anchor.center,
           textRenderer: TextPaint(
-              style: TextStyle(
+              style: const TextStyle(
             fontSize: 18,
-            color: BasicPalette.green.color,
+            color: COLOR_NAME_STEP,
           )),
           boxConfig: TextBoxConfig(
             maxWidth: 180,
@@ -483,7 +491,7 @@ class TextBoxStep extends TextBoxComponent {
   @override
   void render(Canvas c) {
     final rect = Rect.fromLTWH(0, 0, width, height);
-    c.drawRect(rect, Paint()..color = Colors.white10);
+    c.drawRect(rect, Paint()..color = HexColor.fromHex(background));
     super.render(c);
   }
 }

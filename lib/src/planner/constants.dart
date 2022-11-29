@@ -10,7 +10,7 @@ const Map<int, List<Color>> COLORS_GRADIENT = {
     Color(0xffd2bd92),
     Color(0xffddcaa0),
     Color(0xffd5c5a7),
-    Color(0xfffefdf9),
+    Color(0xffdad5bc),
   ],
   4290800506: [
     Color(0xffde7d8c),
@@ -54,12 +54,26 @@ const Map<int, List<Color>> COLORS_GRADIENT = {
   ],
 };
 
+const List<Color> COLORS_STEP_PALETTE = [
+  Color(0xff33beff),
+  Color(0xfffd7c84),
+  Color(0xff45b252),
+  Color(0xfffdde27),
+  Color(0xffb599d6),
+  Color(0xff6073be),
+  Color(0xffb65c91),
+  Color(0xff6b914a),
+  Color(0xfff5c379),
+  Color(0xff8576ee),
+];
+
 const String PATH_NAME_USER_DATA = 'user_data';
 const String STEP_TYPE_RECT = 'rect';
 const String STEP_TYPE_CIRCLE = 'circle';
 
 // locale RU:
-const String ADD_EDIT_STEP_TITLE_DLG = 'Добавить новый шаг';
+const String ADD_STEP_TITLE_DLG = 'Добавить новый шаг';
+const String EDIT_STEP_TITLE_DLG = 'Редактировать';
 const String ADD_EDIT_STEP_NAME_DLG = 'Наименование';
 const String ADD_EDIT_STEP_DESC_DLG = 'Краткое описание';
 const String ADD_EDIT_STEP_VALID_DLG = 'Это поле не должно быть пустым';
@@ -72,6 +86,10 @@ const String CONFIRM_DELETE_STEP =
     'Вы действительно хотите удалить этот шаг? Будут удалены и все последующие шаги!';
 
 const Color COLOR_BUTTONS_STEP = Color(0xFF0C7391);
-const Color COLOR_LINE_BRANCH_STEPS = Color(0xFF021E26);
-const Color COLOR_BORDER_STEP_TOOLS = Color(0xFF00BFFF);
-const double STROKE_BORDER_STEP_TOOLS = 2.1;
+const Color DEFAULT_BACKGROUND_STEP = Color(0xFF728FAD);
+const Color DEFAULT_BACKGROUND_BUILDER = Color(0xffD3D3D3);
+const Color COLOR_BORDER_EDIT_STEP_DLG = Color(0xff42a133);
+const Color COLOR_LINE_BRANCH_STEPS = Color(0xff33beff);
+const Color COLOR_BORDER_STEP_TOOLS = Color(0xFF020202);
+const Color COLOR_NAME_STEP = Color(0xFF100E0E);
+const double STROKE_BORDER_STEP_TOOLS = 6.0;
