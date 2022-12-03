@@ -296,33 +296,68 @@ class PlanController extends GetxController {
   getPositionNewStep(parentStep) {
     var parentPos = parentStep.gPosition;
     var pos = {'x': 150.0, 'y': -50.0};
-    if (parentPos['x'] != null &&
-        parentPos['x'] != 0.0 &&
-        parentPos['y'] != 0.0) {
+    bool isRoot = parentPos['x'] == 0.0 && parentPos['y'] == 0.0;
+    if (parentPos['x'] != null && !isRoot) {
       pos['x'] = pos['x']! + parentPos['x'] + 70.0;
+      pos['y'] = parentPos['y'];
     }
 
     if (parentStep.childs.isNotEmpty) {
       int countStep = parentStep.childs.length;
       switch (countStep) {
         case 1:
-          parentStep.childs[0].gPosition = {'x': pos['x'], 'y': -130.0};
-          pos['y'] = 30.0;
+          if (isRoot) {
+            parentStep.childs[0].gPosition = {'x': pos['x'], 'y': -130.0};
+            pos['y'] = 30.0;
+          } else {
+            parentStep.childs[0].gPosition = {
+              'x': pos['x'],
+              'y': pos['y']! + (-80.0)
+            };
+            pos['y'] = parentPos['y']! + 80.0;
+          }
           break;
         case 2:
-          parentStep.childs[0].gPosition = {'x': pos['x'], 'y': -180.0};
-          parentStep.childs[1].gPosition = {'x': pos['x'], 'y': -50.0};
-          pos['y'] = 80.0;
+          if (isRoot) {
+            parentStep.childs[0].gPosition = {'x': pos['x'], 'y': -180.0};
+            parentStep.childs[1].gPosition = {'x': pos['x'], 'y': -50.0};
+            pos['y'] = 80.0;
+          } else {
+            parentStep.childs[0].gPosition = {
+              'x': pos['x'],
+              'y': parentPos['y']! + (-130.0)
+            };
+            parentStep.childs[1].gPosition = {
+              'x': pos['x'],
+              'y': parentPos['y']
+            };
+            pos['y'] = parentPos['y']! + 130.0;
+          }
           break;
         case 3:
-          parentStep.childs[0].gPosition = {'x': pos['x'], 'y': -250.0};
-          parentStep.childs[1].gPosition = {'x': pos['x'], 'y': -120.0};
-          parentStep.childs[2].gPosition = {'x': pos['x'], 'y': 10.0};
-          pos['y'] = 140.0;
+          if (isRoot) {
+            parentStep.childs[0].gPosition = {'x': pos['x'], 'y': -250.0};
+            parentStep.childs[1].gPosition = {'x': pos['x'], 'y': -120.0};
+            parentStep.childs[2].gPosition = {'x': pos['x'], 'y': 10.0};
+            pos['y'] = 140.0;
+          } else {
+            parentStep.childs[0].gPosition = {
+              'x': pos['x'],
+              'y': parentPos['y']! + (-195.0)
+            };
+            parentStep.childs[1].gPosition = {
+              'x': pos['x'],
+              'y': parentPos['y']! + (-65.0)
+            };
+            parentStep.childs[2].gPosition = {
+              'x': pos['x'],
+              'y': parentPos['y']! + 65
+            };
+            pos['y'] = parentPos['y']! + 195.0;
+          }
           break;
       }
     }
-
     return pos;
   }
 

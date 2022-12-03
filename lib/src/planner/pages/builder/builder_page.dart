@@ -79,20 +79,23 @@ class BuilderPage extends StatelessWidget {
               callbackCancel: () => game.overlays.remove('deleteStepOverlay'));
         },
         'editStepOverlay': (BuildContext context, MyGame game) {
-          StepModel selectedStepModel =
-              planListController.selectedStepModel;
+          StepModel selectedStepModel = planListController.selectedStepModel;
           return StepEditDlg(
-              key: UniqueKey(),
-              game: game,
-              stepId: selectedStepModel.id,
-              title: EDIT_STEP_TITLE_DLG,
-              name: selectedStepModel.name,
-              description: selectedStepModel.description,
-              background: selectedStepModel.background,
+            key: UniqueKey(),
+            game: game,
+            stepId: selectedStepModel.id,
+            title: EDIT_STEP_TITLE_DLG,
+            name: selectedStepModel.name,
+            description: selectedStepModel.description,
+            background: selectedStepModel.background,
           );
         },
         'addStepOverlay': (BuildContext context, MyGame game) {
-          return StepEditDlg(key: UniqueKey(), game: game, title: ADD_STEP_TITLE_DLG,);
+          return StepEditDlg(
+            key: UniqueKey(),
+            game: game,
+            title: ADD_STEP_TITLE_DLG,
+          );
         },
       }),
     );
@@ -210,8 +213,8 @@ class MyGame extends FlameGame
     // var gPosTextY = gVectorPosStep.y + step.height / 2;
     //
     // Vector2 gVectorPosText = Vector2(gPosTextX, gPosTextY);
-    TextComponent textStep = TextBoxStep(
-        stepData.name, gVectorPosStep, stepData.background, Vector2(step.width, step.height));
+    TextComponent textStep = TextBoxStep(stepData.name, gVectorPosStep,
+        stepData.background, Vector2(step.width, step.height));
 
     add(textStep);
 
@@ -287,7 +290,7 @@ class MyGame extends FlameGame
   }
 }
 
-class Step extends PositionComponent with Tappable, CollisionCallbacks {
+class Step extends PositionComponent with Tappable {
   int id;
   double squareWidth = 100.0;
   double squareHeight = 100.0;
@@ -380,19 +383,17 @@ class Step extends PositionComponent with Tappable, CollisionCallbacks {
   String toString() {
     return 'Step';
   }
-
-
-  @override
-  onCollision(Set<Vector2> intersectionPoints, PositionComponent other){
-
-  }
 }
 
 class StepLine extends PositionComponent {
   Vector2 parentPosition;
   Vector2 positionStart;
   Vector2 positionEnd;
-  Paint stylePaint = Paint();
+  Paint stylePaint = Paint()
+    ..strokeWidth = STROKE_BORDER_STEP_TOOLS
+    ..style = PaintingStyle.stroke
+    ..color = COLOR_LINE_BRANCH_STEPS
+    ..strokeWidth = 2;
   final Path _path = Path();
 
   StepLine(
@@ -407,19 +408,12 @@ class StepLine extends PositionComponent {
     // print('parentPosition.x----${parentPosition}');
     // print('positionStart.x----${positionStart}');
     // print('positionEnd.x----${positionEnd}');
+    buildPath();
   }
 
   @override
   void render(Canvas canvas) {
     super.render(canvas);
-    buildPath();
-
-    stylePaint
-      ..strokeWidth = STROKE_BORDER_STEP_TOOLS
-      ..style = PaintingStyle.stroke
-      ..color = COLOR_LINE_BRANCH_STEPS
-      ..strokeWidth = 2;
-
     canvas.drawPath(_path, stylePaint);
   }
 

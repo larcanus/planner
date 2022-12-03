@@ -1,4 +1,4 @@
-name: Planner
+name: planner
 description: App for build your plan
 
 # The following line prevents the package from being accidentally published to
@@ -64,8 +64,7 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  assets:
-    - assets/images/
+#  assets:
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
