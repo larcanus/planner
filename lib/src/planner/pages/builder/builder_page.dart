@@ -277,9 +277,9 @@ class MyGame extends FlameGame
   @override
   void onTapDown(int pointerId, TapDownInfo info) {
     super.onTapDown(pointerId, info);
-    // print('widget----${info.eventPosition.widget}');
-    // print('global---${info.eventPosition.global}');
-    // print('game---${info.eventPosition.game}');
+    print('widget----${info.eventPosition.widget}');
+    print('global---${info.eventPosition.global}');
+    print('game---${info.eventPosition.game}');
     // print('camera.position gg ---- ${camera.position}');
     if (overlays.isActive('addStepOverlay')) {
       overlays.remove('addStepOverlay');

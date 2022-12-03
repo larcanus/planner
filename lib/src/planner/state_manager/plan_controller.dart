@@ -275,6 +275,7 @@ class PlanController extends GetxController {
 
       step.childs.add(stepNew);
       selectedStepModel = stepNew;
+      rebuildPositionBtStep(stepNew);
       updateUserData();
       update();
     }
@@ -376,5 +377,54 @@ class PlanController extends GetxController {
     componentsInGame
         .removeWhere((comp) => comp.toString() == 'Step' && comp.id == idStep);
     update();
+  }
+
+  rebuildPositionBtStep(StepModel step) {
+    List<StepModel> stepsLine = getVerticalLineStepsByX(step.gPosition['x']);
+
+    isIntersectionInLineX(stepsLine);
+  }
+
+  List<StepModel> getVerticalLineStepsByX(double posX) {
+    PlanItemListModel plan = selectedPlan;
+    StepModel rootStep = plan.tree;
+    List<StepModel> findSteps = [];
+
+    recursiveFind(step) {
+      if (step.gPosition['x'] == posX) {
+        findSteps.add(step);
+      }
+      for (int i = 0; i < step.childs.length; i++) {
+        StepModel child = step.childs[i];
+        recursiveFind(child);
+      }
+    }
+
+    recursiveFind(rootStep);
+    return findSteps;
+  }
+
+  bool isIntersectionInLineX(List<StepModel> stepsLine) {
+    bool isHasIntersection = false;
+    List listPos = [];
+    for (var step in stepsLine) {
+      double stepPosY = step.gPosition['y'];
+      for (var pos in listPos) {
+        var re2 = stepPosY.hashCode;
+        var res = stepPosY.isNegative ? stepPosY - pos : stepPosY - pos;
+        if(stepPosY.isNegative && pos.isNegative ){
+          var res = stepPosY.hashCode - pos.hashCode;
+          isHasIntersection = res.hashCode < 130;
+        }
+
+
+        if (pos == stepPosY) {
+          isHasIntersection = true;
+        }
+      }
+      listPos.add(stepPosY);
+    }
+    print(isHasIntersection);
+    return isHasIntersection;
   }
 }
