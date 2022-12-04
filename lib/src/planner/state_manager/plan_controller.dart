@@ -382,7 +382,25 @@ class PlanController extends GetxController {
   rebuildPositionBtStep(StepModel step) {
     List<StepModel> stepsLine = getVerticalLineStepsByX(step.gPosition['x']);
 
-    isIntersectionInLineX(stepsLine);
+    var isHasIntersection = isIntersectionInLineX(stepsLine);
+    if (isHasIntersection) {
+      var parent = getStepById(step.parentId);
+      List<StepModel> stepsLineParent =
+          getVerticalLineStepsByX(parent.gPosition['x']);
+
+      var parentParent = getStepById(parent.parentId);
+      List<StepModel> stepsLineParentParent =
+          getVerticalLineStepsByX(parentParent.gPosition['x']);
+      setSpreadStepsLineParent(stepsLineParentParent);
+
+      for (var stepParent in stepsLineParent) {
+        setPositionChildByParent(stepParent);
+      }
+    }
+
+    if( isIntersectionInLineX(stepsLine) ){
+      rebuildPositionBtStep(step);
+    }
   }
 
   List<StepModel> getVerticalLineStepsByX(double posX) {
@@ -410,21 +428,93 @@ class PlanController extends GetxController {
     for (var step in stepsLine) {
       double stepPosY = step.gPosition['y'];
       for (var pos in listPos) {
-        var re2 = stepPosY.hashCode;
-        var res = stepPosY.isNegative ? stepPosY - pos : stepPosY - pos;
-        if(stepPosY.isNegative && pos.isNegative ){
-          var res = stepPosY.hashCode - pos.hashCode;
-          isHasIntersection = res.hashCode < 130;
-        }
-
-
         if (pos == stepPosY) {
           isHasIntersection = true;
+        } else {
+          var posA = pos > stepPosY ? pos : stepPosY;
+          var posB = pos < stepPosY ? pos : stepPosY;
+
+          var distance = posA - posB;
+          if (distance < 130) {
+            isHasIntersection = true;
+          }
         }
       }
       listPos.add(stepPosY);
     }
     print(isHasIntersection);
     return isHasIntersection;
+  }
+
+  setSpreadStepsLineParent(stepLine) {
+    for (var step in stepLine) {
+      var childs = step.childs;
+      if (childs.isNotEmpty) {
+        int countStep = childs.length;
+        switch (countStep) {
+          case 2:
+            childs[0].gPosition['y'] = childs[0].gPosition['y'] + (-20.0);
+            childs[1].gPosition['y'] = childs[1].gPosition['y'] + 20.0;
+            break;
+          case 3:
+            childs[0].gPosition['y'] = childs[0].gPosition['y'] + (-20.0);
+            childs[1].gPosition['y'] = childs[1].gPosition['y'];
+            childs[2].gPosition['y'] = childs[2].gPosition['y'] + 20.0;
+            break;
+        }
+      }
+    }
+  }
+
+  setPositionChildByParent(StepModel step) {
+    var parentPos = step.gPosition;
+    var pos = {'x': 150.0, 'y': -50.0};
+    var childs = step.childs;
+    if (parentPos['x'] != null) {
+      pos['x'] = pos['x']! + parentPos['x'] + 70.0;
+      pos['y'] = parentPos['y'];
+    }
+    if (childs.isNotEmpty) {
+      int countStep = childs.length;
+      switch (countStep) {
+        case 1:
+          childs[0].gPosition = {'x': pos['x'], 'y': pos['y']!};
+          break;
+
+        case 2:
+          childs[0].gPosition = {'x': pos['x'], 'y': pos['y']! + (-80.0)};
+          childs[1].gPosition = {
+            'x': pos['x'],
+            'y': parentPos['y']! + 80.0,
+          };
+          break;
+        case 3:
+          childs[0].gPosition = {'x': pos['x'], 'y': pos['y']! + (-130.0)};
+          childs[1].gPosition = {
+            'x': pos['x'],
+            'y': parentPos['y'],
+          };
+          childs[2].gPosition = {
+            'x': pos['x'],
+            'y': parentPos['y']! + 130.0,
+          };
+          break;
+        case 4:
+          childs[0].gPosition = {'x': pos['x'], 'y': pos['y']! + (-195.0)};
+          childs[1].gPosition = {
+            'x': pos['x'],
+            'y': parentPos['y']! + (-65.0),
+          };
+          childs[2].gPosition = {
+            'x': pos['x'],
+            'y': parentPos['y']! + 65,
+          };
+          childs[3].gPosition = {
+            'x': pos['x'],
+            'y': parentPos['y']! + 195.0,
+          };
+          break;
+      }
+    }
   }
 }

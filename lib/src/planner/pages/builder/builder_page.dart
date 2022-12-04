@@ -109,6 +109,7 @@ class MyGame extends FlameGame
   late double startZoom;
   late double worldWidth = size.x;
   late double worldHeight = size.y;
+  late double worldTop = -100;
   final PlanController planController = Get.find();
 
   MyGame(this.plan);
@@ -164,7 +165,10 @@ class MyGame extends FlameGame
     // добавляем рута
     createStep(plan.tree);
     buildBranch(plan.tree.childs);
-    camera.worldBounds = Rect.fromLTWH(0, 0, worldWidth, worldHeight);
+    camera.worldBounds = Rect.fromLTWH(-100, worldTop, worldWidth, worldHeight);
+    // print('worldTop ${worldTop}');
+    // print('worldWidth ${worldWidth}');
+    // print('worldHeight $worldHeight');
   }
 
   void buildBranch(List childs) {
@@ -231,7 +235,7 @@ class MyGame extends FlameGame
         ? planController.canvasSizeDefault.y / 2 - stepData.height / 2
         : planController.canvasSizeDefault.y / 2 + stepData.gPosition['y']!;
 
-    setWorldBoundsMax(posX + 500, posY + 500);
+    setWorldBoundsMax(posX, posY);
     return Vector2(posX, posY);
   }
 
@@ -265,11 +269,22 @@ class MyGame extends FlameGame
   }
 
   void setWorldBoundsMax(width, height) {
-    worldWidth = width > worldWidth ? width : worldWidth;
-    worldHeight = height > worldHeight ? height : worldHeight;
+    var newWidth = width + 500;
+    var newHeight = height + 600;
+    worldWidth = newWidth > worldWidth ? newWidth : worldWidth;
+    worldHeight = newHeight > worldHeight ? newHeight : worldHeight;
+    if (height.isNegative) {
+      print(height);
+    }
+    if (height < worldTop) {
+      worldTop = height - 100;
+      worldHeight += ( height - worldTop ) * 3.8;
+      worldHeight += 60;
+    }
   }
 
   void dropWorldBounds() {
+    worldTop = -100;
     worldWidth = planController.canvasSizeDefault.x;
     worldHeight = planController.canvasSizeDefault.y;
   }
@@ -277,9 +292,9 @@ class MyGame extends FlameGame
   @override
   void onTapDown(int pointerId, TapDownInfo info) {
     super.onTapDown(pointerId, info);
-    print('widget----${info.eventPosition.widget}');
-    print('global---${info.eventPosition.global}');
-    print('game---${info.eventPosition.game}');
+    // print('widget----${info.eventPosition.widget}');
+    // print('global---${info.eventPosition.global}');
+    // print('game---${info.eventPosition.game}');
     // print('camera.position gg ---- ${camera.position}');
     if (overlays.isActive('addStepOverlay')) {
       overlays.remove('addStepOverlay');
