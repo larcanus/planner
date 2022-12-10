@@ -391,14 +391,20 @@ class PlanController extends GetxController {
       var parentParent = getStepById(parent.parentId);
       List<StepModel> stepsLineParentParent =
           getVerticalLineStepsByX(parentParent.gPosition['x']);
-      setSpreadStepsLineParent(stepsLineParentParent);
+      setSpreadStepsLineParent(stepsLineParentParent, parent);
 
+      for (var stepParentParent in stepsLineParentParent) {
+        setPositionChildByParent(stepParentParent);
+      }
       for (var stepParent in stepsLineParent) {
         setPositionChildByParent(stepParent);
       }
+      for (var step in stepsLine) {
+        setPositionChildByParent(step);
+      }
     }
 
-    if( isIntersectionInLineX(stepsLine) ){
+    if (isIntersectionInLineX(stepsLine)) {
       rebuildPositionBtStep(step);
     }
   }
@@ -442,27 +448,73 @@ class PlanController extends GetxController {
       }
       listPos.add(stepPosY);
     }
-    print(isHasIntersection);
+    // print(isHasIntersection);
     return isHasIntersection;
   }
 
-  setSpreadStepsLineParent(stepLine) {
+  setSpreadStepsLineParent(stepLine, editableStep) {
     for (var step in stepLine) {
       var childs = step.childs;
       if (childs.isNotEmpty) {
-        int countStep = childs.length;
-        switch (countStep) {
-          case 2:
-            childs[0].gPosition['y'] = childs[0].gPosition['y'] + (-20.0);
-            childs[1].gPosition['y'] = childs[1].gPosition['y'] + 20.0;
-            break;
-          case 3:
-            childs[0].gPosition['y'] = childs[0].gPosition['y'] + (-20.0);
-            childs[1].gPosition['y'] = childs[1].gPosition['y'];
-            childs[2].gPosition['y'] = childs[2].gPosition['y'] + 20.0;
-            break;
+        int editableChildIndex =
+            childs.indexWhere((child) => child.id == editableStep.id);
+        print(editableChildIndex);
+        if (editableChildIndex != -1) {
+          spreadChildsByOneStep(childs,editableChildIndex);
+        } else {
+          var parent = getStepById(step.parentId);
+          var index = parent.childs.indexWhere((child) => child.id == step.id);
+          spreadChildsByOneStep(parent.childs, index);
         }
       }
+    }
+  }
+
+  spreadChildsByOneStep(childs, index){
+    int countStep = childs.length;
+    switch (countStep) {
+      case 2:
+        childs[0].gPosition['y'] = childs[0].gPosition['y'] + (-5.0);
+        childs[1].gPosition['y'] = childs[1].gPosition['y'] + 5.0;
+        break;
+      case 3:
+        if (index == 0) {
+          childs[0].gPosition['y'] = childs[0].gPosition['y'] + (-10.0);
+          childs[1].gPosition['y'] = childs[1].gPosition['y'];
+          childs[2].gPosition['y'] = childs[2].gPosition['y'];
+        } else if (index == 1) {
+          childs[0].gPosition['y'] = childs[0].gPosition['y'] + (-5.0);
+          childs[1].gPosition['y'] = childs[1].gPosition['y'];
+          childs[2].gPosition['y'] = childs[2].gPosition['y'] + 5.0;
+        } else {
+          childs[0].gPosition['y'] = childs[0].gPosition['y'];
+          childs[1].gPosition['y'] = childs[1].gPosition['y'];
+          childs[2].gPosition['y'] = childs[2].gPosition['y'] + 10.0;
+        }
+        break;
+      case 4:
+        if (index == 0) {
+          childs[0].gPosition['y'] = childs[0].gPosition['y'] + (-5.0);
+          childs[1].gPosition['y'] = childs[1].gPosition['y'];
+          childs[2].gPosition['y'] = childs[2].gPosition['y'];
+          childs[3].gPosition['y'] = childs[3].gPosition['y'];
+        } else if (index == 1) {
+          childs[0].gPosition['y'] = childs[0].gPosition['y'] + (-10.0);
+          childs[1].gPosition['y'] = childs[1].gPosition['y'] + (-5.0);
+          childs[2].gPosition['y'] = childs[2].gPosition['y'];
+          childs[3].gPosition['y'] = childs[3].gPosition['y'];
+        } else if (index == 2) {
+          childs[0].gPosition['y'] = childs[0].gPosition['y'];
+          childs[1].gPosition['y'] = childs[1].gPosition['y'];
+          childs[2].gPosition['y'] = childs[2].gPosition['y'] + 5.0;
+          childs[3].gPosition['y'] = childs[3].gPosition['y'] + 10.0;
+        } else {
+          childs[0].gPosition['y'] = childs[0].gPosition['y'];
+          childs[1].gPosition['y'] = childs[1].gPosition['y'];
+          childs[2].gPosition['y'] = childs[2].gPosition['y'];
+          childs[3].gPosition['y'] = childs[3].gPosition['y'] + 5.0;
+        }
+        break;
     }
   }
 
