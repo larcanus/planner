@@ -209,8 +209,7 @@ class PlanController extends GetxController {
   }
 
   getStepById(int id) {
-    PlanItemListModel plan = selectedPlan;
-    StepModel rootStep = plan.tree;
+    StepModel rootStep = getRootStep();
     var findChild;
 
     recursiveFind(step) {
@@ -232,7 +231,12 @@ class PlanController extends GetxController {
     return findChild;
   }
 
-  deleteStepByIdFromTree({id}) {
+  StepModel getRootStep() {
+    PlanItemListModel plan = selectedPlan;
+    return plan.tree;
+  }
+
+  void deleteStepByIdFromTree({id}) {
     int idStep = id ?? selectedStepModel.id;
     PlanItemListModel plan = selectedPlan;
     StepModel rootStep = plan.tree;
@@ -254,7 +258,7 @@ class PlanController extends GetxController {
     update();
   }
 
-  addStep(dataName, dataDesc, dataBackgroundColor, {type = STEP_TYPE_RECT}) {
+  void addStep(dataName, dataDesc, dataBackgroundColor, {type = STEP_TYPE_RECT}) {
     int stepId = selectedStep.id;
     var step = getStepById(stepId);
     if (step != null) {
@@ -275,13 +279,13 @@ class PlanController extends GetxController {
 
       step.childs.add(stepNew);
       selectedStepModel = stepNew;
-      rebuildPositionBtStep(stepNew);
+      rebuildPositionByStep(stepNew);
       updateUserData();
       update();
     }
   }
 
-  updateStepById(id, dataName, dataDesc, dataBackgroundColor,
+  void updateStepById(id, dataName, dataDesc, dataBackgroundColor,
       {type = STEP_TYPE_RECT}) {
     var step = getStepById(id);
     if (step != null) {
@@ -294,7 +298,7 @@ class PlanController extends GetxController {
     }
   }
 
-  getPositionNewStep(parentStep) {
+  Map getPositionNewStep(parentStep) {
     var parentPos = parentStep.gPosition;
     var pos = {'x': 150.0, 'y': -50.0};
     bool isRoot = parentPos['x'] == 0.0 && parentPos['y'] == 0.0;
@@ -362,7 +366,7 @@ class PlanController extends GetxController {
     return pos;
   }
 
-  selectStepById({id}) {
+  void selectStepById({id}) {
     int idStep = id ?? selectedStepModel.id;
     componentsInGame.forEach((comp) {
       if (comp.toString() == 'Step' && comp.id == idStep) {
@@ -372,41 +376,54 @@ class PlanController extends GetxController {
     });
   }
 
-  deleteStepByIdFromComponentsCash({id}) {
+  void deleteStepByIdFromComponentsCash({id}) {
     int idStep = id ?? selectedStepModel.id;
     componentsInGame
         .removeWhere((comp) => comp.toString() == 'Step' && comp.id == idStep);
     update();
   }
 
-  rebuildPositionBtStep(StepModel step) {
+  void rebuildPositionByStep(StepModel step) {
     List<StepModel> stepsLine = getVerticalLineStepsByX(step.gPosition['x']);
 
-    var isHasIntersection = isIntersectionInLineX(stepsLine);
+    bool isHasIntersection = isIntersectionInLineX(stepsLine);
     if (isHasIntersection) {
-      var parent = getStepById(step.parentId);
-      List<StepModel> stepsLineParent =
-          getVerticalLineStepsByX(parent.gPosition['x']);
+      StepModel rootStep = getRootStep();
+      var childId = getFirstParentId(step);
+      int index = rootStep.childs.indexWhere((child) => child.id == childId);
+      spreadChildsByIndex(rootStep.childs, index);
 
-      var parentParent = getStepById(parent.parentId);
-      List<StepModel> stepsLineParentParent =
-          getVerticalLineStepsByX(parentParent.gPosition['x']);
-      setSpreadStepsLineParent(stepsLineParentParent, parent);
-
-      for (var stepParentParent in stepsLineParentParent) {
-        setPositionChildByParent(stepParentParent);
-      }
-      for (var stepParent in stepsLineParent) {
-        setPositionChildByParent(stepParent);
-      }
-      for (var step in stepsLine) {
-        setPositionChildByParent(step);
-      }
+      recursiveSetAllPositionsByParent();
     }
 
     if (isIntersectionInLineX(stepsLine)) {
-      rebuildPositionBtStep(step);
+      rebuildPositionByStep(step);
     }
+  }
+
+  int getFirstParentId(step) {
+    var parent = getStepById(step.parentId);
+    if (parent.parentId != 0) {
+      return getFirstParentId(parent);
+    } else {
+      return step.id;
+    }
+  }
+
+  void recursiveSetAllPositionsByParent() {
+    var root = getRootStep();
+
+    recursiveFind(step) {
+      for (int i = 0; i < step.childs.length; i++) {
+        StepModel child = step.childs[i];
+        setPositionChildByParent(child);
+        if (child.childs.isNotEmpty) {
+          recursiveFind(child);
+        }
+      }
+    }
+
+    recursiveFind(root);
   }
 
   List<StepModel> getVerticalLineStepsByX(double posX) {
@@ -448,29 +465,10 @@ class PlanController extends GetxController {
       }
       listPos.add(stepPosY);
     }
-    // print(isHasIntersection);
     return isHasIntersection;
   }
 
-  setSpreadStepsLineParent(stepLine, editableStep) {
-    for (var step in stepLine) {
-      var childs = step.childs;
-      if (childs.isNotEmpty) {
-        int editableChildIndex =
-            childs.indexWhere((child) => child.id == editableStep.id);
-        print(editableChildIndex);
-        if (editableChildIndex != -1) {
-          spreadChildsByOneStep(childs,editableChildIndex);
-        } else {
-          var parent = getStepById(step.parentId);
-          var index = parent.childs.indexWhere((child) => child.id == step.id);
-          spreadChildsByOneStep(parent.childs, index);
-        }
-      }
-    }
-  }
-
-  spreadChildsByOneStep(childs, index){
+  void spreadChildsByIndex(childs, index) {
     int countStep = childs.length;
     switch (countStep) {
       case 2:
