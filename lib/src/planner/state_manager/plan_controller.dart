@@ -19,6 +19,7 @@ class PlanController extends GetxController {
   var _selectedStepModel = null;
   var _selectedPlan = null;
   var _componentsInGame = [];
+  var intersectionInLine = [];
 
   late Vector2 _canvasSizeDefault;
 
@@ -258,7 +259,8 @@ class PlanController extends GetxController {
     update();
   }
 
-  void addStep(dataName, dataDesc, dataBackgroundColor, {type = STEP_TYPE_RECT}) {
+  void addStep(dataName, dataDesc, dataBackgroundColor,
+      {type = STEP_TYPE_RECT}) {
     int stepId = selectedStep.id;
     var step = getStepById(stepId);
     if (step != null) {
@@ -387,18 +389,64 @@ class PlanController extends GetxController {
     List<StepModel> stepsLine = getVerticalLineStepsByX(step.gPosition['x']);
 
     bool isHasIntersection = isIntersectionInLineX(stepsLine);
+
     if (isHasIntersection) {
-      StepModel rootStep = getRootStep();
-      var childId = getFirstParentId(step);
-      int index = rootStep.childs.indexWhere((child) => child.id == childId);
-      spreadChildsByIndex(rootStep.childs, index);
+      var intersectionInLineBefore = List.from(intersectionInLine);
+      var indexEditableStep = 0;
+      recursiveFindParentWithChild(step, editableChild) {
+        if (step != null) {
+          if (step.childs.length > 1) {
+            int index =
+                step.childs.indexWhere((child) => child.id == editableChild.id);
+            spreadChildsByIndex(step.childs, index);
+            recursiveSetAllPositionsByParent(step);
 
-      recursiveSetAllPositionsByParent();
-    }
+            if (isIntersectionInLineX(stepsLine)) {
+              if (isPositiveChangeIntersection(intersectionInLineBefore)) {
+                indexEditableStep = index;
+                return step;
+              }
+            }
+          } else {
+            return recursiveFindParentWithChild(
+                getStepById(step.parentId), step);
+          }
+        }
+      }
 
-    if (isIntersectionInLineX(stepsLine)) {
-      rebuildPositionByStep(step);
+      var parentBackOne = getStepById(step.parentId);
+      var parentBackTwo = getStepById(parentBackOne.parentId);
+      var parent = recursiveFindParentWithChild(parentBackTwo, step);
+      if (parent != null) {
+        print(parent.name);
+        spreadChilds(parent) {
+          spreadChildsByIndex(parent.childs, indexEditableStep);
+          recursiveSetAllPositionsByParent(parent);
+          if (isIntersectionInLineX(stepsLine)) {
+            spreadChilds(parent);
+          }
+        }
+
+        spreadChilds(parent);
+      }
     }
+  }
+
+  bool isPositiveChangeIntersection(listIntrsBefore) {
+    bool res = false;
+    print(listIntrsBefore);
+    print(intersectionInLine);
+
+    for (var i = 0; i < intersectionInLine.length; i++) {
+      double intrElemBefore = listIntrsBefore[i];
+      double intrElemAfter = intersectionInLine[i];
+      print(intrElemBefore);
+      print(intrElemAfter);
+      if (intrElemAfter > intrElemBefore) {
+        res = true;
+      }
+    }
+    return res;
   }
 
   int getFirstParentId(step) {
@@ -410,9 +458,7 @@ class PlanController extends GetxController {
     }
   }
 
-  void recursiveSetAllPositionsByParent() {
-    var root = getRootStep();
-
+  void recursiveSetAllPositionsByParent(parent) {
     recursiveFind(step) {
       for (int i = 0; i < step.childs.length; i++) {
         StepModel child = step.childs[i];
@@ -423,12 +469,11 @@ class PlanController extends GetxController {
       }
     }
 
-    recursiveFind(root);
+    recursiveFind(parent);
   }
 
   List<StepModel> getVerticalLineStepsByX(double posX) {
-    PlanItemListModel plan = selectedPlan;
-    StepModel rootStep = plan.tree;
+    StepModel rootStep = getRootStep();
     List<StepModel> findSteps = [];
 
     recursiveFind(step) {
@@ -445,21 +490,46 @@ class PlanController extends GetxController {
     return findSteps;
   }
 
+  Map getAllVerticalLines() {
+    StepModel rootStep = getRootStep();
+    Set posX = {};
+    Map linesByPosX = {};
+
+    recursiveFindXPos(step) {
+      posX.add(step.gPosition['x']);
+      for (int i = 0; i < step.childs.length; i++) {
+        StepModel child = step.childs[i];
+        recursiveFindXPos(child);
+      }
+    }
+
+    recursiveFindXPos(rootStep);
+
+    for (var x in posX) {
+      linesByPosX[x] = getVerticalLineStepsByX(x);
+    }
+    return linesByPosX;
+  }
+
   bool isIntersectionInLineX(List<StepModel> stepsLine) {
     bool isHasIntersection = false;
+    intersectionInLine.clear();
     List listPos = [];
     for (var step in stepsLine) {
       double stepPosY = step.gPosition['y'];
       for (var pos in listPos) {
         if (pos == stepPosY) {
           isHasIntersection = true;
+          intersectionInLine.add(0.0);
         } else {
           var posA = pos > stepPosY ? pos : stepPosY;
           var posB = pos < stepPosY ? pos : stepPosY;
 
           var distance = posA - posB;
-          if (distance < 130) {
+          print(distance);
+          if (distance < 110) {
             isHasIntersection = true;
+            intersectionInLine.add(distance);
           }
         }
       }
@@ -472,45 +542,45 @@ class PlanController extends GetxController {
     int countStep = childs.length;
     switch (countStep) {
       case 2:
-        childs[0].gPosition['y'] = childs[0].gPosition['y'] + (-5.0);
-        childs[1].gPosition['y'] = childs[1].gPosition['y'] + 5.0;
+        childs[0].gPosition['y'] = childs[0].gPosition['y'] + (-2.0);
+        childs[1].gPosition['y'] = childs[1].gPosition['y'] + 2.0;
         break;
       case 3:
         if (index == 0) {
-          childs[0].gPosition['y'] = childs[0].gPosition['y'] + (-10.0);
+          childs[0].gPosition['y'] = childs[0].gPosition['y'] + (-2.0);
           childs[1].gPosition['y'] = childs[1].gPosition['y'];
           childs[2].gPosition['y'] = childs[2].gPosition['y'];
         } else if (index == 1) {
-          childs[0].gPosition['y'] = childs[0].gPosition['y'] + (-5.0);
+          childs[0].gPosition['y'] = childs[0].gPosition['y'] + (-2.0);
           childs[1].gPosition['y'] = childs[1].gPosition['y'];
-          childs[2].gPosition['y'] = childs[2].gPosition['y'] + 5.0;
+          childs[2].gPosition['y'] = childs[2].gPosition['y'] + 2.0;
         } else {
           childs[0].gPosition['y'] = childs[0].gPosition['y'];
           childs[1].gPosition['y'] = childs[1].gPosition['y'];
-          childs[2].gPosition['y'] = childs[2].gPosition['y'] + 10.0;
+          childs[2].gPosition['y'] = childs[2].gPosition['y'] + 2.0;
         }
         break;
       case 4:
         if (index == 0) {
-          childs[0].gPosition['y'] = childs[0].gPosition['y'] + (-5.0);
+          childs[0].gPosition['y'] = childs[0].gPosition['y'] + (-2.0);
           childs[1].gPosition['y'] = childs[1].gPosition['y'];
           childs[2].gPosition['y'] = childs[2].gPosition['y'];
           childs[3].gPosition['y'] = childs[3].gPosition['y'];
         } else if (index == 1) {
-          childs[0].gPosition['y'] = childs[0].gPosition['y'] + (-10.0);
-          childs[1].gPosition['y'] = childs[1].gPosition['y'] + (-5.0);
+          childs[0].gPosition['y'] = childs[0].gPosition['y'] + (-2.0);
+          childs[1].gPosition['y'] = childs[1].gPosition['y'] + (-2.0);
           childs[2].gPosition['y'] = childs[2].gPosition['y'];
           childs[3].gPosition['y'] = childs[3].gPosition['y'];
         } else if (index == 2) {
           childs[0].gPosition['y'] = childs[0].gPosition['y'];
           childs[1].gPosition['y'] = childs[1].gPosition['y'];
-          childs[2].gPosition['y'] = childs[2].gPosition['y'] + 5.0;
-          childs[3].gPosition['y'] = childs[3].gPosition['y'] + 10.0;
+          childs[2].gPosition['y'] = childs[2].gPosition['y'] + 2.0;
+          childs[3].gPosition['y'] = childs[3].gPosition['y'] + 2.0;
         } else {
           childs[0].gPosition['y'] = childs[0].gPosition['y'];
           childs[1].gPosition['y'] = childs[1].gPosition['y'];
           childs[2].gPosition['y'] = childs[2].gPosition['y'];
-          childs[3].gPosition['y'] = childs[3].gPosition['y'] + 5.0;
+          childs[3].gPosition['y'] = childs[3].gPosition['y'] + 2.0;
         }
         break;
     }
