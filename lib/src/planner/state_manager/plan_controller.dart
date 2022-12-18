@@ -20,6 +20,7 @@ class PlanController extends GetxController {
   var _selectedPlan = null;
   var _componentsInGame = [];
   var intersectionInLine = [];
+  var intersectionInBunch = [];
 
   late Vector2 _canvasSizeDefault;
 
@@ -388,6 +389,29 @@ class PlanController extends GetxController {
   void rebuildPositionByStep(StepModel step) {
     List<StepModel> stepsLine = getVerticalLineStepsByX(step.gPosition['x']);
 
+    bool isIntrsInBunch = isIntersectionInBunch(stepsLine);
+
+    if (isIntrsInBunch) {
+      var intersectionInBunchLBefore = List.from(intersectionInBunch);
+      var parentOne = getStepById(step.parentId);
+      var parentTwo = getStepById(parentOne.parentId);
+      int index =
+          parentTwo.childs.indexWhere((child) => child.id == parentOne.id);
+      if (parentTwo != null) {
+        spreadChilds(parent) {
+          spreadChildsByIndex(parent.childs, index);
+          recursiveSetAllPositionsByParent(parent);
+          if (isIntersectionInBunch(stepsLine)) {
+            if (isPositiveChangeIntersectionBunch(intersectionInBunchLBefore)) {
+              spreadChilds(parent);
+            }
+          }
+        }
+
+        spreadChilds(parentTwo);
+      }
+    }
+
     bool isHasIntersection = isIntersectionInLineX(stepsLine);
 
     if (isHasIntersection) {
@@ -405,6 +429,9 @@ class PlanController extends GetxController {
               if (isPositiveChangeIntersection(intersectionInLineBefore)) {
                 indexEditableStep = index;
                 return step;
+              } else {
+                return recursiveFindParentWithChild(
+                    getStepById(step.parentId), step);
               }
             }
           } else {
@@ -416,14 +443,17 @@ class PlanController extends GetxController {
 
       var parentBackOne = getStepById(step.parentId);
       var parentBackTwo = getStepById(parentBackOne.parentId);
-      var parent = recursiveFindParentWithChild(parentBackTwo, step);
+      var parent = recursiveFindParentWithChild(parentBackTwo, parentBackOne);
+      print(parent);
       if (parent != null) {
         print(parent.name);
         spreadChilds(parent) {
           spreadChildsByIndex(parent.childs, indexEditableStep);
           recursiveSetAllPositionsByParent(parent);
           if (isIntersectionInLineX(stepsLine)) {
-            spreadChilds(parent);
+            if (isPositiveChangeIntersection(intersectionInLineBefore)) {
+              spreadChilds(parent);
+            }
           }
         }
 
@@ -432,18 +462,75 @@ class PlanController extends GetxController {
     }
   }
 
+  bool isIntersectionInBunch(stepsLine) {
+    bool res = false;
+    intersectionInBunch.clear();
+    List listSteps = [];
+    for (var step in stepsLine) {
+      double stepPosY = step.gPosition['y'];
+
+      for (var stepPos in listSteps) {
+        double pos = stepPos.gPosition['y'];
+
+        if (pos == stepPosY) {
+          var parent1 = getStepById(getStepById(step.parentId).parentId);
+          var parent2 = getStepById(getStepById(stepPos.parentId).parentId);
+          if (parent1.id == parent2.id) {
+            intersectionInBunch.add(pos);
+            res = true;
+          }
+        } else {
+          var posA = pos > stepPosY ? pos : stepPosY;
+          var posB = pos < stepPosY ? pos : stepPosY;
+
+          var distance = posA - posB;
+          if (distance < 110) {
+            var parent1 = getStepById(getStepById(step.parentId).parentId);
+            var parent2 = getStepById(getStepById(stepPos.parentId).parentId);
+            if (parent1.id == parent2.id) {
+              intersectionInBunch.add(distance);
+              res = true;
+            }
+          }
+        }
+      }
+      listSteps.add(step);
+    }
+
+    return res;
+  }
+
   bool isPositiveChangeIntersection(listIntrsBefore) {
     bool res = false;
-    print(listIntrsBefore);
-    print(intersectionInLine);
+    print('Before $listIntrsBefore');
+    print('now $intersectionInLine');
 
-    for (var i = 0; i < intersectionInLine.length; i++) {
+    for (var i = 0; i < listIntrsBefore.length; i++) {
       double intrElemBefore = listIntrsBefore[i];
-      double intrElemAfter = intersectionInLine[i];
-      print(intrElemBefore);
-      print(intrElemAfter);
-      if (intrElemAfter > intrElemBefore) {
-        res = true;
+      double intrElemAfter = intersectionInLine[0];
+      if (intersectionInLine.length > i) {
+        intrElemAfter = intersectionInLine[i];
+        if (intrElemAfter > intrElemBefore) {
+          res = true;
+        }
+      }
+    }
+    return res;
+  }
+
+  bool isPositiveChangeIntersectionBunch(listIntrsBefore) {
+    bool res = false;
+    print('Before $listIntrsBefore');
+    print('now $intersectionInBunch');
+
+    for (var i = 0; i < listIntrsBefore.length; i++) {
+      double intrElemBefore = listIntrsBefore[i];
+      double intrElemAfter = intersectionInBunch[0];
+      if (intersectionInBunch.length > i) {
+        intrElemAfter = intersectionInBunch[i];
+        if (intrElemAfter > intrElemBefore) {
+          res = true;
+        }
       }
     }
     return res;
@@ -526,7 +613,6 @@ class PlanController extends GetxController {
           var posB = pos < stepPosY ? pos : stepPosY;
 
           var distance = posA - posB;
-          print(distance);
           if (distance < 110) {
             isHasIntersection = true;
             intersectionInLine.add(distance);
@@ -567,7 +653,7 @@ class PlanController extends GetxController {
           childs[2].gPosition['y'] = childs[2].gPosition['y'];
           childs[3].gPosition['y'] = childs[3].gPosition['y'];
         } else if (index == 1) {
-          childs[0].gPosition['y'] = childs[0].gPosition['y'] + (-2.0);
+          childs[0].gPosition['y'] = childs[0].gPosition['y'] + (-4.0);
           childs[1].gPosition['y'] = childs[1].gPosition['y'] + (-2.0);
           childs[2].gPosition['y'] = childs[2].gPosition['y'];
           childs[3].gPosition['y'] = childs[3].gPosition['y'];
@@ -575,7 +661,7 @@ class PlanController extends GetxController {
           childs[0].gPosition['y'] = childs[0].gPosition['y'];
           childs[1].gPosition['y'] = childs[1].gPosition['y'];
           childs[2].gPosition['y'] = childs[2].gPosition['y'] + 2.0;
-          childs[3].gPosition['y'] = childs[3].gPosition['y'] + 2.0;
+          childs[3].gPosition['y'] = childs[3].gPosition['y'] + 4.0;
         } else {
           childs[0].gPosition['y'] = childs[0].gPosition['y'];
           childs[1].gPosition['y'] = childs[1].gPosition['y'];
