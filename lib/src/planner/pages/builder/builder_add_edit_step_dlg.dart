@@ -155,9 +155,9 @@ class _StepEditDlgState extends State<StepEditDlg> {
                           currentColor.toHex());
                       widget.game.overlays.remove('editStepOverlay');
                     }
+                    widget.game.overlays.add('buttonRevert');
                     widget.game.refreshTree();
                     planController.selectStepById();
-                    widget.game.overlays.remove('buttonsStep');
                   }
                 },
                 child: const Text(ADD_EDIT_STEP_SAVE_DLG),

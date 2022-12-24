@@ -64,6 +64,26 @@ class BuilderPage extends StatelessWidget {
                     ]))
           ]);
         },
+        'buttonRevert': (BuildContext context, MyGame game) {
+          return Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+            Container(
+                margin: const EdgeInsets.all(10),
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      FloatingActionButton(
+                        heroTag: 'btn0',
+                        onPressed: () {
+                          planListController.recoveryTree();
+                          game.refreshTree();
+                          game.overlays.remove('buttonRevert');
+                        },
+                        backgroundColor: Colors.green,
+                        child: const Icon(size: 25, Icons.replay),
+                      ),
+                    ]))
+          ]);
+        },
         'deleteStepOverlay': (BuildContext context, MyGame game) {
           return ConfirmDlg(
               key: UniqueKey(),
@@ -75,8 +95,11 @@ class BuilderPage extends StatelessWidget {
                 planListController.deleteStepByIdFromTree();
                 game.refreshTree();
                 planListController.deleteStepByIdFromComponentsCash();
+                game.overlays.remove('buttonsStep');
               },
-              callbackCancel: () => game.overlays.remove('deleteStepOverlay'));
+              callbackCancel: () {
+                game.overlays.remove('deleteStepOverlay');
+              });
         },
         'editStepOverlay': (BuildContext context, MyGame game) {
           StepModel selectedStepModel = planListController.selectedStepModel;
@@ -278,7 +301,7 @@ class MyGame extends FlameGame
     }
     if (height < worldTop) {
       worldTop = height - 100;
-      worldHeight += ( height - worldTop ) * 3.8;
+      worldHeight += (height - worldTop) * 3.8;
       worldHeight += 60;
     }
   }

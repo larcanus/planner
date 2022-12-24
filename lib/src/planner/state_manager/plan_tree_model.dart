@@ -21,6 +21,17 @@ class PlanTreeModel {
     required this.childs,
   });
 
+  PlanTreeModel.clone(PlanTreeModel originalModel)
+      : id = originalModel.id,
+        name = originalModel.name,
+        description = originalModel.description,
+        parentId = originalModel.parentId,
+        gPosition = originalModel.gPosition,
+        width = originalModel.width,
+        height = originalModel.height,
+        type = originalModel.type,
+        childs = originalModel.childs;
+
   PlanTreeModel.fromJson(Map<String, dynamic> json)
       : id = json['id'],
         name = json['name'],

@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class StepModel {
   int id;
   String name;
@@ -22,6 +24,18 @@ class StepModel {
     required this.type,
     required this.childs,
   });
+
+  StepModel.clone(StepModel originalModel)
+      : id = UniqueKey().hashCode,
+        name = originalModel.name,
+        description = originalModel.description,
+        background = originalModel.background,
+        parentId = originalModel.parentId,
+        gPosition = originalModel.gPosition,
+        width = originalModel.width,
+        height = originalModel.height,
+        type = originalModel.type,
+        childs = originalModel.childs;
 
   StepModel.fromJson(Map<String, dynamic> json)
       : id = json['id'],

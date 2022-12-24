@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:planner/src/planner/pages/plans_list/plan_item_list_widget.dart';
 import 'package:planner/src/planner/state_manager/plan_item_list_model.dart';
+import 'package:planner/src/planner/state_manager/plan_tree_model.dart';
 import 'package:planner/src/planner/state_manager/step_model.dart';
 import 'package:planner/src/planner/utils.dart';
 import '../constants.dart';
@@ -21,12 +22,17 @@ class PlanController extends GetxController {
   var _componentsInGame = [];
   var intersectionInLine = [];
   var intersectionInBunch = [];
+  var _savedTree = null;
 
   late Vector2 _canvasSizeDefault;
 
   get selectedTab => _selectedTab.value;
 
   set selectedTab(index) => _selectedTab.value = index;
+
+  get savedTree => _savedTree;
+
+  set savedTree(tree) => _savedTree = tree;
 
   List<PlanItemListModel> get itemListItemModel => _itemListItemModel.value;
 
@@ -262,6 +268,7 @@ class PlanController extends GetxController {
 
   void addStep(dataName, dataDesc, dataBackgroundColor,
       {type = STEP_TYPE_RECT}) {
+    saveTree();
     int stepId = selectedStep.id;
     var step = getStepById(stepId);
     if (step != null) {
@@ -286,6 +293,17 @@ class PlanController extends GetxController {
       updateUserData();
       update();
     }
+  }
+
+  saveTree(){
+    PlanItemListModel plan = selectedPlan;
+    StepModel clonModel = StepModel.clone( plan.tree );
+    savedTree = clonModel;
+  }
+
+  recoveryTree(){
+    PlanItemListModel plan = selectedPlan;
+    plan.tree = savedTree;
   }
 
   void updateStepById(id, dataName, dataDesc, dataBackgroundColor,
