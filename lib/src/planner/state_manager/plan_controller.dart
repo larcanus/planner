@@ -248,7 +248,7 @@ class PlanController extends GetxController {
     int idStep = id ?? selectedStepModel.id;
     PlanItemListModel plan = selectedPlan;
     StepModel rootStep = plan.tree;
-
+    saveTree();
     recursiveFind(step) {
       for (int i = 0; i < step.childs.length; i++) {
         StepModel child = step.childs[i];
@@ -295,13 +295,26 @@ class PlanController extends GetxController {
     }
   }
 
-  saveTree(){
-    PlanItemListModel plan = selectedPlan;
-    StepModel clonModel = StepModel.clone( plan.tree );
-    savedTree = clonModel;
+  saveTree() {
+    StepModel cloneModel = StepModel.clone(getRootStep());
+
+    recursiveClone(step) {
+      for (int i = 0; i < step.childs.length; i++) {
+        StepModel child = step.childs[i];
+        StepModel cloneChild = StepModel.clone(child);
+        step.childs.remove(child);
+        step.childs.add( cloneChild );
+        if (cloneChild.childs.isNotEmpty) {
+          recursiveClone(cloneChild);
+        }
+      }
+    }
+
+    recursiveClone(cloneModel);
+    savedTree = cloneModel;
   }
 
-  recoveryTree(){
+  recoveryTree() {
     PlanItemListModel plan = selectedPlan;
     plan.tree = savedTree;
   }

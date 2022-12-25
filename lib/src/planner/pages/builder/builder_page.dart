@@ -96,6 +96,7 @@ class BuilderPage extends StatelessWidget {
                 game.refreshTree();
                 planListController.deleteStepByIdFromComponentsCash();
                 game.overlays.remove('buttonsStep');
+                game.overlays.add('buttonRevert');
               },
               callbackCancel: () {
                 game.overlays.remove('deleteStepOverlay');

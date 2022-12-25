@@ -26,16 +26,16 @@ class StepModel {
   });
 
   StepModel.clone(StepModel originalModel)
-      : id = UniqueKey().hashCode,
+      : id = originalModel.id,
         name = originalModel.name,
         description = originalModel.description,
         background = originalModel.background,
         parentId = originalModel.parentId,
-        gPosition = originalModel.gPosition,
+        gPosition = Map.from( originalModel.gPosition ),
         width = originalModel.width,
         height = originalModel.height,
         type = originalModel.type,
-        childs = originalModel.childs;
+        childs = List<StepModel>.from(originalModel.childs);
 
   StepModel.fromJson(Map<String, dynamic> json)
       : id = json['id'],
