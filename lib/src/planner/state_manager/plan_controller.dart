@@ -302,8 +302,9 @@ class PlanController extends GetxController {
       for (int i = 0; i < step.childs.length; i++) {
         StepModel child = step.childs[i];
         StepModel cloneChild = StepModel.clone(child);
-        step.childs.remove(child);
-        step.childs.add( cloneChild );
+        step.childs.removeAt(i);
+        step.childs.insert(i, cloneChild);
+
         if (cloneChild.childs.isNotEmpty) {
           recursiveClone(cloneChild);
         }
@@ -317,10 +318,13 @@ class PlanController extends GetxController {
   recoveryTree() {
     PlanItemListModel plan = selectedPlan;
     plan.tree = savedTree;
+    updateUserData();
+    update();
   }
 
   void updateStepById(id, dataName, dataDesc, dataBackgroundColor,
       {type = STEP_TYPE_RECT}) {
+    saveTree();
     var step = getStepById(id);
     if (step != null) {
       step
