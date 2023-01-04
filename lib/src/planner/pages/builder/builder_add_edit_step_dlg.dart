@@ -144,16 +144,16 @@ class _StepEditDlgState extends State<StepEditDlg> {
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     if (stepId == null) {
+                      widget.game.overlays.remove('addStepOverlay');
                       planController.addStep(_textFormTitleController.text,
                           _textFormDescController.text, currentColor.toHex());
-                      widget.game.overlays.remove('addStepOverlay');
                     } else {
+                      widget.game.overlays.remove('editStepOverlay');
                       planController.updateStepById(
                           stepId,
                           _textFormTitleController.text,
                           _textFormDescController.text,
                           currentColor.toHex());
-                      widget.game.overlays.remove('editStepOverlay');
                     }
                     widget.game.overlays.add('buttonRevert');
                     widget.game.refreshTree();

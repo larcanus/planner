@@ -20,8 +20,8 @@ class PlanController extends GetxController {
   var _selectedStepModel = null;
   var _selectedPlan = null;
   var _componentsInGame = [];
-  var intersectionInLine = [];
-  var intersectionInBunch = [];
+  var intersectionInLine = {};
+  var intersectionInBunch = {};
   var _savedTree = null;
 
   late Vector2 _canvasSizeDefault;
@@ -254,6 +254,7 @@ class PlanController extends GetxController {
         StepModel child = step.childs[i];
         if (child.id == idStep) {
           step.childs.removeAt(i);
+          recursiveSetAllPositionsByParent(getStepById(step.parentId));
           break;
         } else {
           recursiveFind(child);
@@ -424,83 +425,100 @@ class PlanController extends GetxController {
   void rebuildPositionByStep(StepModel step) {
     List<StepModel> stepsLine = getVerticalLineStepsByX(step.gPosition['x']);
 
-    bool isIntrsInBunch = isIntersectionInBunch(stepsLine);
-
-    if (isIntrsInBunch) {
-      var intersectionInBunchLBefore = List.from(intersectionInBunch);
-      var parentOne = getStepById(step.parentId);
-      var parentTwo = getStepById(parentOne.parentId);
-      int index =
-          parentTwo.childs.indexWhere((child) => child.id == parentOne.id);
-      if (parentTwo != null) {
-        spreadChilds(parent) {
-          spreadChildsByIndex(parent.childs, index);
-          recursiveSetAllPositionsByParent(parent);
-          if (isIntersectionInBunch(stepsLine)) {
-            if (isPositiveChangeIntersectionBunch(intersectionInBunchLBefore)) {
-              spreadChilds(parent);
-            }
-          }
-        }
-
-        spreadChilds(parentTwo);
+    int protectStackOF = 10;
+    for (var i = 0; i < protectStackOF; i++) {
+      bool isIntrsInBunch = isIntersectionInBunch(stepsLine);
+      if (isIntrsInBunch) {
+        spreadInBunch(stepsLine, step);
+      } else {
+        break;
       }
     }
 
-    bool isHasIntersection = isIntersectionInLineX(stepsLine);
+    for (var i = 0; i < protectStackOF; i++) {
+      bool isHasIntersection = isIntersectionInLineX(stepsLine);
+      // bool isHasIntersection = false;
+      if (isHasIntersection) {
+        List idsStep = List.from(intersectionInLine.keys);
+        StepModel intrsStep = getStepById(idsStep.first);
+        spreadByParentInLine(stepsLine, intrsStep);
+      } else {
+        break;
+      }
+    }
+  }
 
-    if (isHasIntersection) {
-      var intersectionInLineBefore = List.from(intersectionInLine);
-      var indexEditableStep = 0;
-      recursiveFindParentWithChild(step, editableChild) {
-        if (step != null) {
-          if (step.childs.length > 1) {
-            int index =
-                step.childs.indexWhere((child) => child.id == editableChild.id);
-            spreadChildsByIndex(step.childs, index);
-            recursiveSetAllPositionsByParent(step);
-
-            if (isIntersectionInLineX(stepsLine)) {
-              if (isPositiveChangeIntersection(intersectionInLineBefore)) {
-                indexEditableStep = index;
-                return step;
-              } else {
-                return recursiveFindParentWithChild(
-                    getStepById(step.parentId), step);
-              }
-            }
-          } else {
-            return recursiveFindParentWithChild(
-                getStepById(step.parentId), step);
+  spreadInBunch(stepsLine, addedStep) {
+    var intersectionInBunchLBefore = Map.from(intersectionInBunch);
+    var parentOne = getStepById(addedStep.parentId);
+    var parentTwo = getStepById(parentOne.parentId);
+    int index =
+        parentTwo.childs.indexWhere((child) => child.id == parentOne.id);
+    if (parentTwo != null) {
+      spreadChilds(parent) {
+        spreadChildsByIndex(parent.childs, index);
+        recursiveSetAllPositionsByParent(parent);
+        if (isIntersectionInBunch(stepsLine)) {
+          if (isPositiveChangeIntersectionBunch(intersectionInBunchLBefore)) {
+            spreadChilds(parent);
           }
         }
       }
 
-      var parentBackOne = getStepById(step.parentId);
-      var parentBackTwo = getStepById(parentBackOne.parentId);
-      var parent = recursiveFindParentWithChild(parentBackTwo, parentBackOne);
-      print(parent);
-      if (parent != null) {
-        print(parent.name);
-        spreadChilds(parent) {
-          spreadChildsByIndex(parent.childs, indexEditableStep);
-          recursiveSetAllPositionsByParent(parent);
+      spreadChilds(parentTwo);
+    }
+  }
+
+  spreadByParentInLine(stepsLine, intersectionStep) {
+    var intersectionInLineBefore = Map.from(intersectionInLine);
+    var indexEditableStep = 0;
+    recursiveFindParentWithChild(step, editableChild) {
+      if (step != null) {
+        if (step.childs.length > 1) {
+          int index =
+              step.childs.indexWhere((child) => child.id == editableChild.id);
+          spreadChildsByIndex(step.childs, index);
+          recursiveSetAllPositionsByParent(step);
+
           if (isIntersectionInLineX(stepsLine)) {
             if (isPositiveChangeIntersection(intersectionInLineBefore)) {
-              spreadChilds(parent);
+              indexEditableStep = index;
+              return step;
+            } else {
+              return recursiveFindParentWithChild(
+                  getStepById(step.parentId), step);
             }
           }
+        } else {
+          return recursiveFindParentWithChild(getStepById(step.parentId), step);
         }
-
-        spreadChilds(parent);
       }
+    }
+
+    var parentBackOne = getStepById(intersectionStep.parentId);
+    var parentBackTwo = getStepById(parentBackOne.parentId);
+    var parent = recursiveFindParentWithChild(parentBackTwo, parentBackOne);
+    print('parent.name before if --->  ${parent}');
+    if (parent != null) {
+      print('parent.name --->  ${parent.name}');
+      spreadChilds(parent) {
+        spreadChildsByIndex(parent.childs, indexEditableStep);
+        recursiveSetAllPositionsByParent(parent);
+        if (isIntersectionInLineX(stepsLine)) {
+          if (isPositiveChangeIntersection(intersectionInLineBefore)) {
+            spreadChilds(parent);
+          }
+        }
+      }
+
+      spreadChilds(parent);
     }
   }
 
   bool isIntersectionInBunch(stepsLine) {
     bool res = false;
-    intersectionInBunch.clear();
     List listSteps = [];
+    intersectionInBunch.clear();
     for (var step in stepsLine) {
       double stepPosY = step.gPosition['y'];
 
@@ -511,7 +529,7 @@ class PlanController extends GetxController {
           var parent1 = getStepById(getStepById(step.parentId).parentId);
           var parent2 = getStepById(getStepById(stepPos.parentId).parentId);
           if (parent1.id == parent2.id) {
-            intersectionInBunch.add(pos);
+            intersectionInBunch[step.id] = -1;
             res = true;
           }
         } else {
@@ -519,11 +537,11 @@ class PlanController extends GetxController {
           var posB = pos < stepPosY ? pos : stepPosY;
 
           var distance = posA - posB;
-          if (distance < 110) {
+          if (distance < 130) {
             var parent1 = getStepById(getStepById(step.parentId).parentId);
             var parent2 = getStepById(getStepById(stepPos.parentId).parentId);
             if (parent1.id == parent2.id) {
-              intersectionInBunch.add(distance);
+              intersectionInBunch[step.id] = distance;
               res = true;
             }
           }
@@ -535,16 +553,15 @@ class PlanController extends GetxController {
     return res;
   }
 
-  bool isPositiveChangeIntersection(listIntrsBefore) {
+  bool isPositiveChangeIntersection(mapIntrsBefore) {
     bool res = false;
-    print('Before $listIntrsBefore');
+    print('Before $mapIntrsBefore');
     print('now $intersectionInLine');
 
-    for (var i = 0; i < listIntrsBefore.length; i++) {
-      double intrElemBefore = listIntrsBefore[i];
-      double intrElemAfter = intersectionInLine[0];
-      if (intersectionInLine.length > i) {
-        intrElemAfter = intersectionInLine[i];
+    for (var id in mapIntrsBefore.keys) {
+      var intrElemBefore = mapIntrsBefore[id];
+      var intrElemAfter = intersectionInLine[id];
+      if (intrElemAfter != null) {
         if (intrElemAfter > intrElemBefore) {
           res = true;
         }
@@ -553,16 +570,15 @@ class PlanController extends GetxController {
     return res;
   }
 
-  bool isPositiveChangeIntersectionBunch(listIntrsBefore) {
+  bool isPositiveChangeIntersectionBunch(mapIntrsBefore) {
     bool res = false;
-    print('Before $listIntrsBefore');
-    print('now $intersectionInBunch');
+    print('Bnch Before $mapIntrsBefore');
+    print('Bnch now $intersectionInBunch');
 
-    for (var i = 0; i < listIntrsBefore.length; i++) {
-      double intrElemBefore = listIntrsBefore[i];
-      double intrElemAfter = intersectionInBunch[0];
-      if (intersectionInBunch.length > i) {
-        intrElemAfter = intersectionInBunch[i];
+    for (var id in mapIntrsBefore.keys) {
+      var intrElemBefore = mapIntrsBefore[id];
+      var intrElemAfter = intersectionInBunch[id];
+      if (intrElemAfter != null) {
         if (intrElemAfter > intrElemBefore) {
           res = true;
         }
@@ -635,22 +651,23 @@ class PlanController extends GetxController {
 
   bool isIntersectionInLineX(List<StepModel> stepsLine) {
     bool isHasIntersection = false;
-    intersectionInLine.clear();
     List listPos = [];
+    intersectionInLine.clear();
     for (var step in stepsLine) {
       double stepPosY = step.gPosition['y'];
       for (var pos in listPos) {
         if (pos == stepPosY) {
           isHasIntersection = true;
-          intersectionInLine.add(0.0);
+          intersectionInLine[step.id] = 0.0;
         } else {
           var posA = pos > stepPosY ? pos : stepPosY;
           var posB = pos < stepPosY ? pos : stepPosY;
 
           var distance = posA - posB;
-          if (distance < 110) {
+          if (distance < 130) {
             isHasIntersection = true;
-            intersectionInLine.add(distance);
+            print('steps ${step.name}');
+            intersectionInLine[step.id] = distance;
           }
         }
       }
