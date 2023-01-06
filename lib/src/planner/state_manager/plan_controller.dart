@@ -440,9 +440,15 @@ class PlanController extends GetxController {
       // bool isHasIntersection = false;
       if (isHasIntersection) {
         List idsStep = List.from(intersectionInLine.keys);
-        String firstIntersection = idsStep.first;
-        String firstId = firstIntersection.split('-').first;
-        int stepId = int.parse(firstId);
+        List ids = [];
+        for (var stepId in idsStep) {
+          List ids = stepId.split('-');
+          ids.addAll( ids );
+        }
+
+        // String firstId = firstIntersection.split('-').first;
+
+        int stepId = int.parse(ids.first);
         StepModel intrsStep = getStepById(stepId);
         spreadByParentInLine(stepsLine, intrsStep);
       } else {
@@ -485,8 +491,8 @@ class PlanController extends GetxController {
           print('step for sread to find parent --> ${step.name}');
           int index =
               step.childs.indexWhere((child) => child.id == editableChild.id);
-          spreadChildsByIndex(step.childs, index);
-          recursiveSetAllPositionsByParent(step);
+          List shift = spreadChildsByIndex(step.childs, index);
+          recursiveSetAllPositionsByShift(step.childs, shift);
 
           if (isIntersectionInLineX(stepsLine)) {
             if (isPositiveChangeIntersection(intersectionInLineBefore)) {
@@ -510,8 +516,8 @@ class PlanController extends GetxController {
     if (parent != null) {
       print('parent.name --->  ${parent.name}');
       spreadChilds(parent) {
-        int shift = spreadChildsByIndex(parent.childs, indexEditableStep);
-        recursiveSetAllPositionsByParentShift(parent, shift);
+        List shift = spreadChildsByIndex(parent.childs, indexEditableStep);
+        recursiveSetAllPositionsByShift(parent.childs, shift);
         if (isIntersectionInLineX(stepsLine)) {
           if (isPositiveChangeIntersection(intersectionInLineBefore) &&
               protectStackOF > 0) {
@@ -620,18 +626,23 @@ class PlanController extends GetxController {
     recursiveFind(parent);
   }
 
-  void recursiveSetAllPositionsByParentShift(parent, int shift) {
+  void recursiveSetAllPositionsByShift(List childs, List shifts) {
+    double currentShift = 0;
     recursiveFind(step) {
       for (int i = 0; i < step.childs.length; i++) {
-        StepModel child = step.childs[i];
-        setPositionChildByParentShift(child, shift);
+        var child = step.childs[i];
+        setPositionChildByParentShift(child, currentShift);
         if (child.childs.isNotEmpty) {
           recursiveFind(child);
         }
       }
     }
 
-    recursiveFind(parent);
+    for (var i = 0; i < childs.length; i++) {
+      var child = childs.elementAt(i);
+      currentShift = shifts.elementAt(i);
+      recursiveFind(child);
+    }
   }
 
   List<StepModel> getVerticalLineStepsByX(double posX) {
@@ -704,28 +715,29 @@ class PlanController extends GetxController {
 
   spreadChildsByIndex(childs, index) {
     int countStep = childs.length;
-    int shift = 0;
+    List shiftChl = [-2.0, 2.0];
     switch (countStep) {
       case 2:
         childs[0].gPosition['y'] = childs[0].gPosition['y'] + (-2.0);
         childs[1].gPosition['y'] = childs[1].gPosition['y'] + 2.0;
-        shift = 2;
         break;
       case 3:
         if (index == 0) {
           childs[0].gPosition['y'] = childs[0].gPosition['y'] + (-2.0);
           childs[1].gPosition['y'] = childs[1].gPosition['y'];
           childs[2].gPosition['y'] = childs[2].gPosition['y'];
+          shiftChl = [-2.0, 0.0, 0.0];
         } else if (index == 1) {
           childs[0].gPosition['y'] = childs[0].gPosition['y'] + (-2.0);
           childs[1].gPosition['y'] = childs[1].gPosition['y'];
           childs[2].gPosition['y'] = childs[2].gPosition['y'] + 2.0;
+          shiftChl = [-2.0, 0.0, 2.0];
         } else {
           childs[0].gPosition['y'] = childs[0].gPosition['y'];
           childs[1].gPosition['y'] = childs[1].gPosition['y'];
           childs[2].gPosition['y'] = childs[2].gPosition['y'] + 2.0;
+          shiftChl = [0.0, 0.0, 2.0];
         }
-        shift = -2;
         break;
       case 4:
         if (index == 0) {
@@ -733,29 +745,29 @@ class PlanController extends GetxController {
           childs[1].gPosition['y'] = childs[1].gPosition['y'];
           childs[2].gPosition['y'] = childs[2].gPosition['y'];
           childs[3].gPosition['y'] = childs[3].gPosition['y'];
-          shift = -2;
+          shiftChl = [-2.0, 0.0, 0.0, 0.0];
         } else if (index == 1) {
           childs[0].gPosition['y'] = childs[0].gPosition['y'] + (-4.0);
           childs[1].gPosition['y'] = childs[1].gPosition['y'] + (-2.0);
           childs[2].gPosition['y'] = childs[2].gPosition['y'];
           childs[3].gPosition['y'] = childs[3].gPosition['y'];
-          shift = -4;
+          shiftChl = [-4.0, -2.0, 0.0, 0.0];
         } else if (index == 2) {
           childs[0].gPosition['y'] = childs[0].gPosition['y'];
           childs[1].gPosition['y'] = childs[1].gPosition['y'];
           childs[2].gPosition['y'] = childs[2].gPosition['y'] + 2.0;
           childs[3].gPosition['y'] = childs[3].gPosition['y'] + 4.0;
-          shift = 4;
+          shiftChl = [0.0, 0.0, 2.0, 4.0];
         } else {
           childs[0].gPosition['y'] = childs[0].gPosition['y'];
           childs[1].gPosition['y'] = childs[1].gPosition['y'];
           childs[2].gPosition['y'] = childs[2].gPosition['y'];
           childs[3].gPosition['y'] = childs[3].gPosition['y'] + 2.0;
-          shift = 2;
+          shiftChl = [0.0, 0.0, 0.0, 2.0];
         }
         break;
     }
-    return shift;
+    return shiftChl;
   }
 
   setPositionChildByParent(StepModel step) {
@@ -810,19 +822,9 @@ class PlanController extends GetxController {
     }
   }
 
-  setPositionChildByParentShift(StepModel step, int shift) {
-    var parentPos = step.gPosition;
-    var pos = {'x': 150.0, 'y': -50.0};
-    var childs = step.childs;
-    if (parentPos['x'] != null) {
-      pos['x'] = pos['x']! + parentPos['x'] + 70.0;
-      pos['y'] = parentPos['y'];
-    }
-    print('shift $shift ${step.name}');
-    if (childs.isNotEmpty) {
-      for( step in childs){
-        step.gPosition['y'] - shift;
-      }
-    }
+  setPositionChildByParentShift(StepModel step, double shift) {
+    print('shift $shift ${step.name} ${step.gPosition['y']}');
+    step.gPosition['y'] = step.gPosition['y'] + shift;
+    print('---${step.gPosition['y']}');
   }
 }
