@@ -443,12 +443,18 @@ class PlanController extends GetxController {
         List ids = [];
         for (var stepId in idsStep) {
           List ids = stepId.split('-');
-          ids.addAll( ids );
+          ids.add(ids[0]);
+          ids.add(ids[1]);
         }
 
-        // String firstId = firstIntersection.split('-').first;
+        var idEditableStep =
+            ids.singleWhere((id) => id == step.id, orElse: () => null);
 
         int stepId = int.parse(ids.first);
+        if (idEditableStep != null) {
+          stepId = idEditableStep;
+        }
+
         StepModel intrsStep = getStepById(stepId);
         spreadByParentInLine(stepsLine, intrsStep);
       } else {
