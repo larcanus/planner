@@ -423,42 +423,48 @@ class PlanController extends GetxController {
   }
 
   void rebuildPositionByStep(StepModel step) {
-    List<StepModel> stepsLine = getVerticalLineStepsByX(step.gPosition['x']);
+    List<StepModel> stepsLineFocus =
+        getVerticalLineStepsByX(step.gPosition['x']);
 
-    int protectStackOF = 3;
+    int protectStackOF = 2;
     for (var i = 0; i < protectStackOF; i++) {
-      bool isIntrsInBunch = isIntersectionInBunch(stepsLine);
+      bool isIntrsInBunch = isIntersectionInBunch(stepsLineFocus);
       if (isIntrsInBunch) {
-        spreadInBunch(stepsLine, step);
+        spreadInBunch(stepsLineFocus, step);
       } else {
         break;
       }
     }
 
-    for (var i = 0; i < protectStackOF; i++) {
-      bool isHasIntersection = isIntersectionInLineX(stepsLine);
-      // bool isHasIntersection = false;
-      if (isHasIntersection) {
-        List idsStep = List.from(intersectionInLine.keys);
-        List ids = [];
-        for (var stepId in idsStep) {
-          List ids = stepId.split('-');
-          ids.add(ids[0]);
-          ids.add(ids[1]);
+    Map allLine = getAllVerticalLines();
+    for (var stepsLine in allLine.values) {
+      for (var i = 0; i < protectStackOF; i++) {
+        bool isHasIntersection = isIntersectionInLineX(stepsLine);
+        // bool isHasIntersection = false;
+        if (isHasIntersection) {
+          List idsStep = List.from(intersectionInLine.keys);
+          List ids = [];
+          for (var stepId in idsStep) {
+            List idss = stepId.split('-');
+            ids.add(idss[0]);
+            ids.add(idss[1]);
+          }
+
+          var isIdEditableStep = false;
+          for (var id in ids) {
+            isIdEditableStep = int.parse(id) == step.id;
+          }
+
+          int stepId = step.id;
+          if (!isIdEditableStep) {
+            stepId = int.parse(ids.first);
+          }
+
+          StepModel intrsStep = getStepById(stepId);
+          spreadByParentInLine(stepsLine, intrsStep);
+        } else {
+          break;
         }
-
-        var idEditableStep =
-            ids.singleWhere((id) => id == step.id, orElse: () => null);
-
-        int stepId = int.parse(ids.first);
-        if (idEditableStep != null) {
-          stepId = idEditableStep;
-        }
-
-        StepModel intrsStep = getStepById(stepId);
-        spreadByParentInLine(stepsLine, intrsStep);
-      } else {
-        break;
       }
     }
   }
@@ -490,7 +496,7 @@ class PlanController extends GetxController {
   spreadByParentInLine(stepsLine, intersectionStep) {
     var intersectionInLineBefore = Map.from(intersectionInLine);
     var indexEditableStep = 0;
-    int protectStackOF = 30;
+    int protectStackOF = 40;
     recursiveFindParentWithChild(step, editableChild) {
       if (step != null) {
         if (step.childs.length > 1) {
@@ -505,6 +511,7 @@ class PlanController extends GetxController {
               indexEditableStep = index;
               return step;
             } else {
+              intersectionInLineBefore = Map.from(intersectionInLine);
               return recursiveFindParentWithChild(
                   getStepById(step.parentId), step);
             }
