@@ -254,7 +254,10 @@ class PlanController extends GetxController {
         StepModel child = step.childs[i];
         if (child.id == idStep) {
           step.childs.removeAt(i);
-          // recursiveSetAllPositionsByParent(getRootStep());
+          var parent =
+              step.parentId != 0 ? getStepById(step.parentId) : step;
+          recursiveSetAllPositionsByParent(parent);
+          rebuildPositionByStep(parent);
           break;
         } else {
           recursiveFind(child);
@@ -426,7 +429,8 @@ class PlanController extends GetxController {
     List<StepModel> stepsLineFocus =
         getVerticalLineStepsByX(step.gPosition['x']);
 
-    int protectStackOF = 2;
+    int protectStackOF = 1;
+    int loopCountAllLines = 2;
     for (var i = 0; i < protectStackOF; i++) {
       bool isIntrsInBunch = isIntersectionInBunch(stepsLineFocus);
       if (isIntrsInBunch) {
@@ -435,35 +439,36 @@ class PlanController extends GetxController {
         break;
       }
     }
+    for (var k = 0; k < loopCountAllLines; k++) {
+      Map allLine = getAllVerticalLines();
+      for (var stepsLine in allLine.values) {
+        for (var i = 0; i < protectStackOF; i++) {
+          bool isHasIntersection = isIntersectionInLineX(stepsLine);
+          // bool isHasIntersection = false;
+          if (isHasIntersection) {
+            List idsStep = List.from(intersectionInLine.keys);
+            List ids = [];
+            for (var stepId in idsStep) {
+              List idss = stepId.split('-');
+              ids.add(idss[0]);
+              ids.add(idss[1]);
+            }
 
-    Map allLine = getAllVerticalLines();
-    for (var stepsLine in allLine.values) {
-      for (var i = 0; i < protectStackOF; i++) {
-        bool isHasIntersection = isIntersectionInLineX(stepsLine);
-        // bool isHasIntersection = false;
-        if (isHasIntersection) {
-          List idsStep = List.from(intersectionInLine.keys);
-          List ids = [];
-          for (var stepId in idsStep) {
-            List idss = stepId.split('-');
-            ids.add(idss[0]);
-            ids.add(idss[1]);
+            var isIdEditableStep = false;
+            for (var id in ids) {
+              isIdEditableStep = int.parse(id) == step.id;
+            }
+
+            int stepId = step.id;
+            if (!isIdEditableStep) {
+              stepId = int.parse(ids.first);
+            }
+
+            StepModel intrsStep = getStepById(stepId);
+            spreadByParentInLine(stepsLine, intrsStep);
+          } else {
+            break;
           }
-
-          var isIdEditableStep = false;
-          for (var id in ids) {
-            isIdEditableStep = int.parse(id) == step.id;
-          }
-
-          int stepId = step.id;
-          if (!isIdEditableStep) {
-            stepId = int.parse(ids.first);
-          }
-
-          StepModel intrsStep = getStepById(stepId);
-          spreadByParentInLine(stepsLine, intrsStep);
-        } else {
-          break;
         }
       }
     }
@@ -500,7 +505,7 @@ class PlanController extends GetxController {
     recursiveFindParentWithChild(step, editableChild) {
       if (step != null) {
         if (step.childs.length > 1) {
-          print('step for sread to find parent --> ${step.name}');
+          //print('step for sread to find parent --> ${step.name}');
           int index =
               step.childs.indexWhere((child) => child.id == editableChild.id);
           List shift = spreadChildsByIndex(step.childs, index);
@@ -525,9 +530,9 @@ class PlanController extends GetxController {
     var parentBackOne = getStepById(intersectionStep.parentId);
     var parentBackTwo = getStepById(parentBackOne.parentId);
     var parent = recursiveFindParentWithChild(parentBackTwo, parentBackOne);
-    print('parent.name before if --->  ${parent}');
+    //print('parent.name before if --->  ${parent}');
     if (parent != null) {
-      print('parent.name --->  ${parent.name}');
+      //print('parent.name --->  ${parent.name}');
       spreadChilds(parent) {
         List shift = spreadChildsByIndex(parent.childs, indexEditableStep);
         recursiveSetAllPositionsByShift(parent.childs, shift);
@@ -636,7 +641,11 @@ class PlanController extends GetxController {
       }
     }
 
-    recursiveFind(parent);
+    if (parent.childs.isNotEmpty) {
+      recursiveFind(parent);
+    } else {
+      setPositionChildByParent(parent);
+    }
   }
 
   void recursiveSetAllPositionsByShift(List childs, List shifts) {
@@ -836,8 +845,8 @@ class PlanController extends GetxController {
   }
 
   setPositionChildByParentShift(StepModel step, double shift) {
-    print('shift $shift ${step.name} ${step.gPosition['y']}');
+    //print('shift $shift ${step.name} ${step.gPosition['y']}');
     step.gPosition['y'] = step.gPosition['y'] + shift;
-    print('---${step.gPosition['y']}');
+    //print('---${step.gPosition['y']}');
   }
 }
