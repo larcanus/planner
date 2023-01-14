@@ -165,7 +165,7 @@ class PlanController extends GetxController {
           width: 140,
           height: 100,
           type: STEP_TYPE_RECT,
-          gPosition: {'x': 0.0, 'y': 0.0},
+          gPosition: {'x': 500.0, 'y': 500.0},
           childs: [],
         )));
     updateUserData();
@@ -343,7 +343,7 @@ class PlanController extends GetxController {
   Map getPositionNewStep(parentStep) {
     var parentPos = parentStep.gPosition;
     var pos = {'x': 150.0, 'y': -50.0};
-    bool isRoot = parentPos['x'] == 0.0 && parentPos['y'] == 0.0;
+    bool isRoot = parentPos['x'] == 500 && parentPos['y'] == 500;
     if (parentPos['x'] != null && !isRoot) {
       pos['x'] = pos['x']! + parentPos['x'] + 70.0;
       pos['y'] = parentPos['y'];

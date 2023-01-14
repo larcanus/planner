@@ -67,7 +67,7 @@ class BuilderPage extends StatelessWidget {
         'buttonRevert': (BuildContext context, MyGame game) {
           return Column(mainAxisAlignment: MainAxisAlignment.start, children: [
             Container(
-                margin: const EdgeInsets.all(10),
+                margin: const EdgeInsets.fromLTRB(10, 100, 10, 10),
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -80,6 +80,27 @@ class BuilderPage extends StatelessWidget {
                         },
                         backgroundColor: Colors.green,
                         child: const Icon(size: 25, Icons.replay),
+                      ),
+                    ]))
+          ]);
+        },
+        'buttonZoom': (BuildContext context, MyGame game) {
+          return Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+            Container(
+                margin: const EdgeInsets.all(10),
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      FloatingActionButton(
+                        heroTag: 'btn3',
+                        onPressed: () {
+                          if(game.camera.zoom >= 0.2){
+                            game.camera.zoom -= 0.05;
+                          }
+                          print('game.camera.zoom ${game.camera.zoom}');
+                        },
+                        backgroundColor: Colors.green,
+                        child: const Icon(size: 25, Icons.zoom_in_map_outlined),
                       ),
                     ]))
           ]);
@@ -143,26 +164,29 @@ class MyGame extends FlameGame
 
   @override
   Future<void> onLoad() async {
+    debugMode = true;
     camera.speed = 450;
     planController.canvasSizeDefault = Vector2(canvasSize.x, canvasSize.y);
     buildTree();
     // onGameResize(Vector2(1000, 1500));
     // camera.viewport = FixedResolutionViewport(Vector2(400, 700));
-    // camera.setRelativeOffset(Anchor.center);
+    // camera.setRelativeOffset(Anchor.topRight);
     // var s = canvasSize;
     // var d = viewportProjector;
     // var h = projector;
     // var gg = camera.gameSize;
     // var zom = camera.zoom;
     // var zosm = FixedResolutionViewport;
+    overlays.add('buttonZoom');
   }
 
   void clampZoom() {
-    camera.zoom = camera.zoom.clamp(0.05, 3.0);
+    camera.zoom = camera.zoom.clamp(0.2, 1.5);
   }
 
   @override
   void onScroll(PointerScrollInfo info) {
+    print('zoom currentScale. ${ info.scrollDelta.game.y.sign}');
     camera.zoom += info.scrollDelta.game.y.sign * zoomPerScrollUnit;
     clampZoom();
   }
@@ -176,12 +200,21 @@ class MyGame extends FlameGame
   void onScaleUpdate(ScaleUpdateInfo info) {
     final currentScale = info.scale.global;
     if (!currentScale.isIdentity()) {
-      camera.zoom = startZoom * currentScale.y;
-      clampZoom();
+      // print('camera.zoom ${camera.zoom}');
+      // print('zoom startZoom ${startZoom}');
+      // print('zoom currentScale. ${ currentScale}');
+      double targetZoom = startZoom * currentScale.y;
+      if( startZoom < 1.4 && startZoom > 0.2 ){
+        camera.zoom = startZoom * targetZoom;
+        clampZoom();
+      }
     } else {
-      camera.translateBy(-info.delta.game);
+      // print('info.delta ${ info.delta}');
+      // print('zoom -info.delta.game. ${ -info.delta.global}');
+      camera.translateBy(-info.delta.global);
       camera.snap();
     }
+
   }
 
   void buildTree() {
@@ -189,10 +222,12 @@ class MyGame extends FlameGame
     // добавляем рута
     createStep(plan.tree);
     buildBranch(plan.tree.childs);
-    camera.worldBounds = Rect.fromLTWH(-100, worldTop, worldWidth, worldHeight);
+    camera.worldBounds = Rect.fromLTWH(-100, worldTop, worldWidth * 2, worldHeight * 4);
     // print('worldTop ${worldTop}');
     // print('worldWidth ${worldWidth}');
     // print('worldHeight $worldHeight');
+    camera.moveTo(Vector2(1000,1000));
+    camera.snap();
   }
 
   void buildBranch(List childs) {
@@ -210,7 +245,7 @@ class MyGame extends FlameGame
     var parent = planController.getStepById(stepData.parentId);
     Vector2 gVectorPosStep = getGlobalPosStep(stepData);
     bool isRootStep =
-        stepData.gPosition['x'] == 0 && stepData.gPosition['y'] == 0;
+        stepData.gPosition['x'] == 500.0 && stepData.gPosition['y'] == 500.0;
 
     // добавляем шаг
     Step step = Step(
@@ -251,13 +286,13 @@ class MyGame extends FlameGame
 
   Vector2 getGlobalPosStep(stepData) {
     bool isRootStep =
-        stepData.gPosition['x'] == 0 && stepData.gPosition['y'] == 0;
+        stepData.gPosition['x'] == 500.0 && stepData.gPosition['y'] == 500.0;
     var posX = isRootStep
-        ? planController.canvasSizeDefault.x / 2 - stepData.width / 2
-        : planController.canvasSizeDefault.x / 2 + stepData.gPosition['x']!;
+        ? planController.canvasSizeDefault.x / 2 - stepData.width / 2 + 500
+        : planController.canvasSizeDefault.x / 2 + stepData.gPosition['x']! + 500;
     var posY = isRootStep
-        ? planController.canvasSizeDefault.y / 2 - stepData.height / 2
-        : planController.canvasSizeDefault.y / 2 + stepData.gPosition['y']!;
+        ? planController.canvasSizeDefault.y / 2 - stepData.height / 2 + 1200
+        : planController.canvasSizeDefault.y / 2 + stepData.gPosition['y']! + 1200;
 
     setWorldBoundsMax(posX, posY);
     return Vector2(posX, posY);
@@ -320,6 +355,7 @@ class MyGame extends FlameGame
     // print('global---${info.eventPosition.global}');
     // print('game---${info.eventPosition.game}');
     // print('camera.position gg ---- ${camera.position}');
+    // print('canvas x y === ${canvasSize.x} ${canvasSize.y}');
     if (overlays.isActive('addStepOverlay')) {
       overlays.remove('addStepOverlay');
     }
