@@ -408,11 +408,11 @@ class PlanController extends GetxController {
     return pos;
   }
 
-  void selectStepById({id}) {
+  void selectStepById({id, force}) {
     int idStep = id ?? selectedStepModel.id;
     componentsInGame.forEach((comp) {
       if (comp.toString() == 'Step' && comp.id == idStep) {
-        comp.selectStep();
+        comp.selectStep(force:force);
         comp.handlerButtonsStep();
       }
     });

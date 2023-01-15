@@ -64,45 +64,78 @@ class BuilderPage extends StatelessWidget {
                     ]))
           ]);
         },
+        'buttonMoveRoot': (BuildContext context, MyGame game) {
+          return Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+            Container(
+                margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+                child:
+                    Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+                  FloatingActionButton(
+                    heroTag: 'btn4',
+                    onPressed: () {
+                      game.camera.zoom = 1;
+                      game.moveRootStep(force: true);
+                    },
+                    backgroundColor: Colors.amber,
+                    child: const Icon(size: 25, Icons.start_sharp),
+                  ),
+                ]))
+          ]);
+        },
         'buttonRevert': (BuildContext context, MyGame game) {
           return Column(mainAxisAlignment: MainAxisAlignment.start, children: [
             Container(
-                margin: const EdgeInsets.fromLTRB(10, 100, 10, 10),
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      FloatingActionButton(
-                        heroTag: 'btn0',
-                        onPressed: () {
-                          planListController.recoveryTree();
-                          game.refreshTree();
-                          game.overlays.remove('buttonRevert');
-                        },
-                        backgroundColor: Colors.green,
-                        child: const Icon(size: 25, Icons.replay),
-                      ),
-                    ]))
+                margin: const EdgeInsets.fromLTRB(10, 160, 10, 10),
+                child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                  FloatingActionButton(
+                    heroTag: 'btn5',
+                    onPressed: () {
+                      planListController.recoveryTree();
+                      game.refreshTree();
+                      game.overlays.remove('buttonRevert');
+                    },
+                    backgroundColor: Colors.green,
+                    child: const Icon(size: 25, Icons.replay),
+                  ),
+                ]))
           ]);
         },
-        'buttonZoom': (BuildContext context, MyGame game) {
+        'buttonZoomMax': (BuildContext context, MyGame game) {
           return Column(mainAxisAlignment: MainAxisAlignment.start, children: [
             Container(
                 margin: const EdgeInsets.all(10),
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      FloatingActionButton(
-                        heroTag: 'btn3',
-                        onPressed: () {
-                          if(game.camera.zoom >= 0.2){
-                            game.camera.zoom -= 0.05;
-                          }
-                          print('game.camera.zoom ${game.camera.zoom}');
-                        },
-                        backgroundColor: Colors.green,
-                        child: const Icon(size: 25, Icons.zoom_in_map_outlined),
-                      ),
-                    ]))
+                child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                  FloatingActionButton(
+                    heroTag: 'btn6',
+                    onPressed: () {
+                      if (game.camera.zoom >= 0.25) {
+                        game.camera.zoom -= 0.05;
+                      }
+                      print('game.camera.zoom ${game.camera.zoom}');
+                    },
+                    backgroundColor: Colors.green,
+                    child: const Icon(size: 25, Icons.zoom_out),
+                  ),
+                ]))
+          ]);
+        },
+        'buttonZoomMin': (BuildContext context, MyGame game) {
+          return Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+            Container(
+                margin: const EdgeInsets.fromLTRB(10, 80, 10, 10),
+                child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                  FloatingActionButton(
+                    heroTag: 'btn7',
+                    onPressed: () {
+                      if (game.camera.zoom <= 1.55) {
+                        game.camera.zoom += 0.05;
+                      }
+                      print('game.camera.zoom ${game.camera.zoom}');
+                    },
+                    backgroundColor: Colors.green,
+                    child: const Icon(size: 25, Icons.zoom_in),
+                  ),
+                ]))
           ]);
         },
         'deleteStepOverlay': (BuildContext context, MyGame game) {
@@ -177,16 +210,24 @@ class MyGame extends FlameGame
     // var gg = camera.gameSize;
     // var zom = camera.zoom;
     // var zosm = FixedResolutionViewport;
-    overlays.add('buttonZoom');
+    overlays.add('buttonZoomMax');
+    overlays.add('buttonZoomMin');
+    overlays.add('buttonMoveRoot');
+    moveRootStep(force: true);
+  }
+
+  void moveRootStep({force = false}) {
+    StepModel root = planController.getRootStep();
+    planController.selectStepById(id: root.id, force: force);
   }
 
   void clampZoom() {
-    camera.zoom = camera.zoom.clamp(0.2, 1.5);
+    camera.zoom = camera.zoom.clamp(0.21, 1.55);
   }
 
   @override
   void onScroll(PointerScrollInfo info) {
-    print('zoom currentScale. ${ info.scrollDelta.game.y.sign}');
+    print('zoom currentScale. ${info.scrollDelta.game.y.sign}');
     camera.zoom += info.scrollDelta.game.y.sign * zoomPerScrollUnit;
     clampZoom();
   }
@@ -204,7 +245,7 @@ class MyGame extends FlameGame
       // print('zoom startZoom ${startZoom}');
       // print('zoom currentScale. ${ currentScale}');
       double targetZoom = startZoom * currentScale.y;
-      if( startZoom < 1.4 && startZoom > 0.2 ){
+      if (startZoom < 1.7 && startZoom > 0.21) {
         camera.zoom = startZoom * targetZoom;
         clampZoom();
       }
@@ -214,7 +255,6 @@ class MyGame extends FlameGame
       camera.translateBy(-info.delta.global);
       camera.snap();
     }
-
   }
 
   void buildTree() {
@@ -222,12 +262,11 @@ class MyGame extends FlameGame
     // добавляем рута
     createStep(plan.tree);
     buildBranch(plan.tree.childs);
-    camera.worldBounds = Rect.fromLTWH(-100, worldTop, worldWidth * 2, worldHeight * 4);
+    camera.worldBounds =
+        Rect.fromLTWH(-100, worldTop, worldWidth * 2, worldHeight * 4);
     // print('worldTop ${worldTop}');
     // print('worldWidth ${worldWidth}');
     // print('worldHeight $worldHeight');
-    camera.moveTo(Vector2(1000,1000));
-    camera.snap();
   }
 
   void buildBranch(List childs) {
@@ -289,10 +328,14 @@ class MyGame extends FlameGame
         stepData.gPosition['x'] == 500.0 && stepData.gPosition['y'] == 500.0;
     var posX = isRootStep
         ? planController.canvasSizeDefault.x / 2 - stepData.width / 2 + 500
-        : planController.canvasSizeDefault.x / 2 + stepData.gPosition['x']! + 500;
+        : planController.canvasSizeDefault.x / 2 +
+            stepData.gPosition['x']! +
+            500;
     var posY = isRootStep
         ? planController.canvasSizeDefault.y / 2 - stepData.height / 2 + 1200
-        : planController.canvasSizeDefault.y / 2 + stepData.gPosition['y']! + 1200;
+        : planController.canvasSizeDefault.y / 2 +
+            stepData.gPosition['y']! +
+            1200;
 
     setWorldBoundsMax(posX, posY);
     return Vector2(posX, posY);
@@ -407,7 +450,7 @@ class Step extends PositionComponent with Tappable {
     return true;
   }
 
-  void selectStep() {
+  void selectStep({force = false}) {
     final touchPoint = Vector2(0, 0);
     Vector2 sizeTools = Vector2(squareWidth, squareHeight);
     double posWidgetGlobalX = position.x + squareWidth / 2;
@@ -416,6 +459,9 @@ class Step extends PositionComponent with Tappable {
         posWidgetGlobalX - planController.canvasSizeDefault.x / 2,
         posWidgetGlobalY - planController.canvasSizeDefault.y / 2);
     camera.moveTo(centerWidgetScreenPos);
+    if (force) {
+      camera.snap();
+    }
     StepTools stepTools = StepTools(position: touchPoint, size: sizeTools);
     add(stepTools);
 
