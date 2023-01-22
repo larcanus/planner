@@ -100,7 +100,7 @@ class BuilderPage extends StatelessWidget {
                 ]))
           ]);
         },
-        'buttonZoomMax': (BuildContext context, MyGame game) {
+        'buttonZoomMin': (BuildContext context, MyGame game) {
           return Column(mainAxisAlignment: MainAxisAlignment.start, children: [
             Container(
                 margin: const EdgeInsets.all(10),
@@ -108,10 +108,17 @@ class BuilderPage extends StatelessWidget {
                   FloatingActionButton(
                     heroTag: 'btn6',
                     onPressed: () {
-                      if (game.camera.zoom >= 0.25) {
+                      print('zoom ${game.camera.zoom}');
+                      if (game.camera.zoom >= 0.26) {
+                        var gameSizeBefore = game.camera.gameSize;
                         game.camera.zoom -= 0.05;
+                        var gameSizeAfter = game.camera.gameSize;
+                        var deltaSize = gameSizeAfter - gameSizeBefore;
+                        print('deltaX ${deltaSize}');
+
+                        game.camera.translateBy(-deltaSize/2);
+                        game.camera.snap();
                       }
-                      print('game.camera.zoom ${game.camera.zoom}');
                     },
                     backgroundColor: Colors.green,
                     child: const Icon(size: 25, Icons.zoom_out),
@@ -119,7 +126,7 @@ class BuilderPage extends StatelessWidget {
                 ]))
           ]);
         },
-        'buttonZoomMin': (BuildContext context, MyGame game) {
+        'buttonZoomMax': (BuildContext context, MyGame game) {
           return Column(mainAxisAlignment: MainAxisAlignment.start, children: [
             Container(
                 margin: const EdgeInsets.fromLTRB(10, 80, 10, 10),
@@ -128,9 +135,17 @@ class BuilderPage extends StatelessWidget {
                     heroTag: 'btn7',
                     onPressed: () {
                       if (game.camera.zoom <= 1.55) {
+                        var gameSizeBefore = game.camera.gameSize;
                         game.camera.zoom += 0.05;
+                        var gameSizeAfter = game.camera.gameSize;
+                        var deltaSize = gameSizeAfter - gameSizeBefore;
+                        print('deltaX ${deltaSize}');
+
+                        game.camera.translateBy(-deltaSize/2);
+                        game.camera.snap();
                       }
-                      print('game.camera.zoom ${game.camera.zoom}');
+                      print('button.zoom ${game.camera.zoom}');
+                      print('button.position ${game.camera.position}');
                     },
                     backgroundColor: Colors.green,
                     child: const Icon(size: 25, Icons.zoom_in),
@@ -222,7 +237,7 @@ class MyGame extends FlameGame
   }
 
   void clampZoom() {
-    camera.zoom = camera.zoom.clamp(0.21, 1.55);
+    camera.zoom = camera.zoom.clamp(0.25, 1.55);
   }
 
   @override
@@ -241,13 +256,18 @@ class MyGame extends FlameGame
   void onScaleUpdate(ScaleUpdateInfo info) {
     final currentScale = info.scale.global;
     if (!currentScale.isIdentity()) {
-      // print('camera.zoom ${camera.zoom}');
+      print('camera.zoom ${camera.zoom}');
       // print('zoom startZoom ${startZoom}');
       // print('zoom currentScale. ${ currentScale}');
       double targetZoom = startZoom * currentScale.y;
-      if (startZoom < 1.7 && startZoom > 0.21) {
+      if (startZoom <= 1.7 && startZoom >= 0.20) {
+        var gameSizeBefore = camera.gameSize;
         camera.zoom = startZoom * targetZoom;
         clampZoom();
+        var gameSizeAfter = camera.gameSize;
+        var deltaSize = gameSizeAfter - gameSizeBefore;
+        camera.translateBy(-deltaSize/2);
+        camera.snap();
       }
     } else {
       // print('info.delta ${ info.delta}');
