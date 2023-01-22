@@ -475,10 +475,11 @@ class Step extends PositionComponent with Tappable {
     Vector2 sizeTools = Vector2(squareWidth, squareHeight);
     double posWidgetGlobalX = position.x + squareWidth / 2;
     double posWidgetGlobalY = position.y + squareHeight / 2;
-    Vector2 centerWidgetScreenPos = Vector2(
-        posWidgetGlobalX - planController.canvasSizeDefault.x / 2,
-        posWidgetGlobalY - planController.canvasSizeDefault.y / 2);
-    camera.moveTo(centerWidgetScreenPos);
+
+    Vector2 centerWidgetScreenPos2 = Vector2(
+        posWidgetGlobalX - camera.gameSize[0] / 2,
+        posWidgetGlobalY - camera.gameSize[1] / 2);
+    camera.moveTo(centerWidgetScreenPos2);
     if (force) {
       camera.snap();
     }
@@ -512,10 +513,10 @@ class Step extends PositionComponent with Tappable {
     super.onTapUp(info);
     double posWidgetGlobalX = position.x + squareWidth / 2;
     double posWidgetGlobalY = position.y + squareHeight / 2;
-    Vector2 centerWidgetScreenPos = Vector2(
-        posWidgetGlobalX - camera.canvasSize.x / 2,
-        posWidgetGlobalY - camera.canvasSize.y / 2);
-    camera.moveTo(centerWidgetScreenPos);
+    Vector2 centerWidgetScreenPos2 = Vector2(
+        posWidgetGlobalX - camera.gameSize[0] / 2,
+        posWidgetGlobalY - camera.gameSize[1] / 2);
+    camera.moveTo(centerWidgetScreenPos2);
 
     return true;
   }

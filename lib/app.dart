@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:planner/src/planner/pages/cur_plan/current_plan_page.dart';
+import 'package:planner/src/planner/pages/settings/setting_page.dart';
 import 'package:planner/src/planner/state_manager/plan_controller.dart';
 import 'package:planner/src/planner/pages/plans_list/plan_list_page.dart';
 
@@ -28,10 +29,7 @@ class _FrontPageState extends State<FrontPage> {
   static final List<Widget> _widgetOptions = <Widget>[
     const CurrentPlanPage(),
     const PlanListPage(),
-    const Text(
-      'Settings',
-      style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-    ),
+    const SettingPage(),
   ];
 
   var bottomNavigationBarItems = <BottomNavigationBarItem>[
