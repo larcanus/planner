@@ -85,6 +85,9 @@ const String ALARM = 'Предупреждение';
 const String CONFIRM_DELETE_STEP =
     'Вы действительно хотите удалить этот шаг? Будут удалены и все последующие шаги!';
 
+const String SETTING_VERSION = 'Версия приложения';
+const String SETTING_SCALE_BUTTONS = 'Включить кнопки маштабирования';
+
 const Color COLOR_BUTTONS_STEP = Color(0xFF0C7391);
 const Color DEFAULT_BACKGROUND_STEP = Color(0xFF728FAD);
 const Color DEFAULT_BACKGROUND_BUILDER = Color(0xffD3D3D3);

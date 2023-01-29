@@ -1,9 +1,9 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:planner/src/planner/pages/plans_list/plan_item_list_widget.dart';
 import 'package:planner/src/planner/state_manager/plan_item_list_model.dart';
-import 'package:planner/src/planner/state_manager/plan_tree_model.dart';
 import 'package:planner/src/planner/state_manager/step_model.dart';
 import 'package:planner/src/planner/utils.dart';
 import '../constants.dart';
@@ -23,6 +23,16 @@ class PlanController extends GetxController {
   var intersectionInLine = {};
   var intersectionInBunch = {};
   var _savedTree = null;
+  var packageInfo = PackageInfo(
+    appName: 'Unknown',
+    packageName: 'Unknown',
+    version: 'Unknown',
+    buildNumber: 'Unknown',
+    buildSignature: 'Unknown',
+    installerStore: 'Unknown',
+  );
+  var settings = { 'isShowButtonsScale' : false };
+
 
   late Vector2 _canvasSizeDefault;
 
@@ -68,9 +78,14 @@ class PlanController extends GetxController {
 
   set canvasSizeDefault(size) => _canvasSizeDefault = size;
 
+  @override
+  void onInit() async {
+    super.onInit();
+    packageInfo = await PackageInfo.fromPlatform();
+  }
+
   void loadPlanItemModels() async {
     _itemListItemModel.clear();
-
     List<dynamic> eternalDataPLan = await getUserData();
     // вариант загрузки руками без хранилища
     // List<PlanItemListModel> eternalDataPLan = [
@@ -254,8 +269,7 @@ class PlanController extends GetxController {
         StepModel child = step.childs[i];
         if (child.id == idStep) {
           step.childs.removeAt(i);
-          var parent =
-              step.parentId != 0 ? getStepById(step.parentId) : step;
+          var parent = step.parentId != 0 ? getStepById(step.parentId) : step;
           recursiveSetAllPositionsByParent(parent);
           rebuildPositionByStep(parent);
           break;
@@ -412,7 +426,7 @@ class PlanController extends GetxController {
     int idStep = id ?? selectedStepModel.id;
     componentsInGame.forEach((comp) {
       if (comp.toString() == 'Step' && comp.id == idStep) {
-        comp.selectStep(force:force);
+        comp.selectStep(force: force);
         comp.handlerButtonsStep();
       }
     });
