@@ -39,7 +39,7 @@ class _PlanListPageState extends State<PlanListPage> {
                 height: 20,
                 child: Center(
                   child: Text(
-                    'всего: ${_conItemList.itemListItemModel.length}',
+                    'всего: ${_conItemList.planItemListModels.length}',
                   ),
                 ),
               ),

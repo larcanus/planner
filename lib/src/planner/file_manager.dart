@@ -4,9 +4,9 @@ import 'constants.dart';
 import 'package:path_provider/path_provider.dart';
 
 
-Future<List> getUserData() async {
+Future<List> getUserPlanData() async {
   String appDocumDirPath = await getADDPath();
-  String wholePath = '$appDocumDirPath/$PATH_NAME_USER_DATA';
+  String wholePath = '$appDocumDirPath/$PATH_NAME_USER_PLANS_DATA';
   bool isExists = await File(wholePath).exists();
 
   if( isExists ){
@@ -17,9 +17,28 @@ Future<List> getUserData() async {
   }
 }
 
-void createUserData(data) async {
+Future<Map<String,dynamic>?> getUserSettingsData() async {
   String appDocumDirPath = await getADDPath();
-  String wholePath = '$appDocumDirPath/$PATH_NAME_USER_DATA';
+  String wholePath = '$appDocumDirPath/$PATH_NAME_USER_SETNGS_DATA';
+  bool isExists = await File(wholePath).exists();
+
+  if( isExists ){
+    String readData = await readFile(wholePath);
+    return json.decode(readData);
+  } else {
+    return null;
+  }
+}
+
+void createUserPlanData(data) async {
+  String appDocumDirPath = await getADDPath();
+  String wholePath = '$appDocumDirPath/$PATH_NAME_USER_PLANS_DATA';
+  writeFile(wholePath, json.encode(data));
+}
+
+void createUserSettingsData(data) async {
+  String appDocumDirPath = await getADDPath();
+  String wholePath = '$appDocumDirPath/$PATH_NAME_USER_SETNGS_DATA';
   writeFile(wholePath, json.encode(data));
 }
 

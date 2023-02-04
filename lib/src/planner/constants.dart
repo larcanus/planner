@@ -67,7 +67,8 @@ const List<Color> COLORS_STEP_PALETTE = [
   Color(0xff8576ee),
 ];
 
-const String PATH_NAME_USER_DATA = 'user_data';
+const String PATH_NAME_USER_PLANS_DATA = 'user_plans_data';
+const String PATH_NAME_USER_SETNGS_DATA = 'user_settings_data';
 const String STEP_TYPE_RECT = 'rect';
 const String STEP_TYPE_CIRCLE = 'circle';
 

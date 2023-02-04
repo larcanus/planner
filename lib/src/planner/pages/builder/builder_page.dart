@@ -225,8 +225,12 @@ class MyGame extends FlameGame
     // var gg = camera.gameSize;
     // var zom = camera.zoom;
     // var zosm = FixedResolutionViewport;
-    overlays.add('buttonZoomMax');
-    overlays.add('buttonZoomMin');
+    Map<String,dynamic> settings =  planController.settings;
+    if( settings['isShowButtonsScale'] ){
+      overlays.add('buttonZoomMax');
+      overlays.add('buttonZoomMin');
+    }
+
     overlays.add('buttonMoveRoot');
     moveRootStep(force: true);
   }

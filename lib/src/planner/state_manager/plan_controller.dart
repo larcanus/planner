@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:planner/src/planner/pages/plans_list/plan_item_list_widget.dart';
 import 'package:planner/src/planner/state_manager/plan_item_list_model.dart';
+import 'package:planner/src/planner/state_manager/settings_model.dart';
 import 'package:planner/src/planner/state_manager/step_model.dart';
 import 'package:planner/src/planner/utils.dart';
 import '../constants.dart';
@@ -11,7 +12,7 @@ import '../file_manager.dart';
 
 class PlanController extends GetxController {
   var _selectedTab = 0.obs;
-  var _itemListItemModel = <PlanItemListModel>[].obs;
+  var _planItemListModels = <PlanItemListModel>[].obs;
   var _itemListWidgets = <Widget>[].obs;
   var _currentActiveModel = null;
   var _currentActiveModelName = 'Нет активного плана'.obs;
@@ -31,8 +32,7 @@ class PlanController extends GetxController {
     buildSignature: 'Unknown',
     installerStore: 'Unknown',
   );
-  var settings = { 'isShowButtonsScale' : false };
-
+  var settings = <String,dynamic>{}.obs;
 
   late Vector2 _canvasSizeDefault;
 
@@ -44,7 +44,7 @@ class PlanController extends GetxController {
 
   set savedTree(tree) => _savedTree = tree;
 
-  List<PlanItemListModel> get itemListItemModel => _itemListItemModel.value;
+  List<PlanItemListModel> get planItemListModels => _planItemListModels.value;
 
   List<Widget> get itemListWidgets => _itemListWidgets;
 
@@ -85,8 +85,12 @@ class PlanController extends GetxController {
   }
 
   void loadPlanItemModels() async {
-    _itemListItemModel.clear();
-    List<dynamic> eternalDataPLan = await getUserData();
+    planItemListModels.clear();
+    List<dynamic> eternalDataPLan = await getUserPlanData();
+    Map<String,dynamic>? settingsData = await getUserSettingsData();
+    settings.value = settingsData ?? Settings().toMap();
+
+
     // вариант загрузки руками без хранилища
     // List<PlanItemListModel> eternalDataPLan = [
     //   PlanItemListModel(
@@ -114,7 +118,7 @@ class PlanController extends GetxController {
           backgroundColor: item['backgroundColor'],
           isActive: item['isActive'],
           tree: tree);
-      _itemListItemModel.add(planItemModel);
+      planItemListModels.add(planItemModel);
       if (item['isActive']) {
         currentActiveModel = planItemModel;
         currentActiveModelName = planItemModel.planeName;
@@ -145,15 +149,19 @@ class PlanController extends GetxController {
     return step;
   }
 
-  updateUserData() {
-    createUserData(itemListItemModel);
+  updateUserPlansData() {
+    createUserPlanData(planItemListModels);
+  }
+
+  updateUserSettingsData() {
+    createUserSettingsData(settings);
   }
 
   getPlanListItemWidgets(void Function() updateWidgetState) {
     _itemListWidgets.clear();
 
-    for (int i = 0; i < itemListItemModel.length; i++) {
-      var itemData = itemListItemModel[i];
+    for (int i = 0; i < planItemListModels.length; i++) {
+      var itemData = planItemListModels[i];
       _itemListWidgets.add(PlanItemListWidget(
           updateWidgetState: updateWidgetState,
           id: itemData.id,
@@ -166,7 +174,7 @@ class PlanController extends GetxController {
   }
 
   addItemList(dataName, dataDesc, dataBackgroundColor) {
-    itemListItemModel.add(PlanItemListModel(
+    planItemListModels.add(PlanItemListModel(
         id: UniqueKey().hashCode,
         planeName: dataName,
         planeDesc: dataDesc,
@@ -183,13 +191,13 @@ class PlanController extends GetxController {
           gPosition: {'x': 500.0, 'y': 500.0},
           childs: [],
         )));
-    updateUserData();
+    updateUserPlansData();
     update();
   }
 
   void updateItemListById(id, dataName, dataDesc, dataBackgroundColor) {
-    for (int i = 0; i < itemListItemModel.length; i++) {
-      var itemData = itemListItemModel[i];
+    for (int i = 0; i < planItemListModels.length; i++) {
+      var itemData = planItemListModels[i];
       if (itemData.id == id) {
         itemData.planeName = dataName;
         itemData.planeDesc = dataDesc;
@@ -197,19 +205,19 @@ class PlanController extends GetxController {
         break;
       }
     }
-    updateUserData();
+    updateUserPlansData();
     update();
   }
 
   void deleteItemListById(id) {
-    itemListItemModel.removeWhere((model) => model.id == id);
-    updateUserData();
+    planItemListModels.removeWhere((model) => model.id == id);
+    updateUserPlansData();
     update();
   }
 
   void activateItemPlanById(id) {
-    for (int i = 0; i < itemListItemModel.length; i++) {
-      var itemData = itemListItemModel[i];
+    for (int i = 0; i < planItemListModels.length; i++) {
+      var itemData = planItemListModels[i];
       if (itemData.id == id) {
         itemData.isActive = true;
         currentActiveModelName = itemData.planeName;
@@ -217,13 +225,13 @@ class PlanController extends GetxController {
         itemData.isActive = false;
       }
     }
-    updateUserData();
+    updateUserPlansData();
     update();
   }
 
   PlanItemListModel getItemPlanById(id) {
-    for (int i = 0; i < itemListItemModel.length; i++) {
-      var itemData = itemListItemModel[i];
+    for (int i = 0; i < planItemListModels.length; i++) {
+      var itemData = planItemListModels[i];
       if (itemData.id == id) {
         return itemData;
       }
@@ -280,7 +288,7 @@ class PlanController extends GetxController {
     }
 
     recursiveFind(rootStep);
-    updateUserData();
+    updateUserPlansData();
     update();
   }
 
@@ -308,7 +316,7 @@ class PlanController extends GetxController {
       step.childs.add(stepNew);
       selectedStepModel = stepNew;
       rebuildPositionByStep(stepNew);
-      updateUserData();
+      updateUserPlansData();
       update();
     }
   }
@@ -336,7 +344,7 @@ class PlanController extends GetxController {
   recoveryTree() {
     PlanItemListModel plan = selectedPlan;
     plan.tree = savedTree;
-    updateUserData();
+    updateUserPlansData();
     update();
   }
 
@@ -349,7 +357,7 @@ class PlanController extends GetxController {
         ..name = dataName
         ..description = dataDesc
         ..background = dataBackgroundColor;
-      updateUserData();
+      updateUserPlansData();
       update();
     }
   }
