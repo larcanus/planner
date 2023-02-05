@@ -66,28 +66,46 @@ const List<Color> COLORS_STEP_PALETTE = [
   Color(0xfff5c379),
   Color(0xff8576ee),
 ];
-
+// locale RU:
+/// settings locale
 const String PATH_NAME_USER_PLANS_DATA = 'user_plans_data';
 const String PATH_NAME_USER_SETNGS_DATA = 'user_settings_data';
-const String STEP_TYPE_RECT = 'rect';
-const String STEP_TYPE_CIRCLE = 'circle';
+const String SETTING_VERSION = 'Версия приложения';
+const String SETTING_SCALE_BUTTONS = 'Включить кнопки маштабирования';
+const String TITLE_CURRENT_PLAM_IS_NOT_ACTIVE = 'Активных нет';
 
-// locale RU:
-const String ADD_STEP_TITLE_DLG = 'Добавить новый шаг';
+/// current page
+const String TITLE_CURRENT_PLAN = 'Текущий:';
+
+/// plan lists page
+const String SLIVER_APP_BAR_TITLE = 'Ваши планы:';
+const String SLIVER_ADAPTER_TITLE = 'всего: ';
 const String EDIT_STEP_TITLE_DLG = 'Редактировать';
+const String DELETE_STEP_TITLE_DLG = 'Удалить';
+const String ADD_EDIT_STEP_ADD_NEW_PLAN = 'Добавить новый план';
 const String ADD_EDIT_STEP_NAME_DLG = 'Наименование';
 const String ADD_EDIT_STEP_DESC_DLG = 'Краткое описание';
 const String ADD_EDIT_STEP_VALID_DLG = 'Это поле не должно быть пустым';
 const String ADD_EDIT_STEP_SAVE_DLG = 'Сохранить';
 const String CONFIRM_CANCEL_DLG = 'Отмена';
 const String CONFIRM_OK_DLG = 'Да';
+const String CONFIRM_DELETE_TITLE = 'Предупреждение';
+const String CONFIRM_DELETE_DESC = 'Вы действительно хотите удалить этот план?';
+
+const String PLAN_LIST_ITEM_IS_ACTIVED = 'Активен';
+const String PLAN_LIST_ITEM_SET_ACTIVE = 'Активировать';
+const String PLAN_LIST_ITEM_BUILDING = 'Строить';
+
+
+/// builder
+const String ADD_STEP_TITLE_DLG = 'Добавить новый шаг';
 const String NAME_ROOT_STEP = 'Шаг №1';
 const String ALARM = 'Предупреждение';
 const String CONFIRM_DELETE_STEP =
     'Вы действительно хотите удалить этот шаг? Будут удалены и все последующие шаги!';
+const String STEP_TYPE_RECT = 'rect';
+const String STEP_TYPE_CIRCLE = 'circle';
 
-const String SETTING_VERSION = 'Версия приложения';
-const String SETTING_SCALE_BUTTONS = 'Включить кнопки маштабирования';
 
 const Color COLOR_BUTTONS_STEP = Color(0xFF0C7391);
 const Color DEFAULT_BACKGROUND_STEP = Color(0xFF728FAD);

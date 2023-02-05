@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:planner/src/planner/pages/plans_list/edit_plan_dlg.dart';
 import 'package:planner/src/planner/state_manager/plan_controller.dart';
 
+import '../../constants.dart';
+
 class PlanListPage extends StatefulWidget {
   const PlanListPage({Key? key}) : super(key: key);
 
@@ -30,7 +32,7 @@ class _PlanListPageState extends State<PlanListPage> {
               pinned: true,
               expandedHeight: 160.0,
               flexibleSpace: FlexibleSpaceBar(
-                title: Text('Ваши планы:'),
+                title: Text(SLIVER_APP_BAR_TITLE),
                 background: FlutterLogo(),
               ),
             ),
@@ -39,7 +41,7 @@ class _PlanListPageState extends State<PlanListPage> {
                 height: 20,
                 child: Center(
                   child: Text(
-                    'всего: ${_conItemList.planItemListModels.length}',
+                    '$SLIVER_ADAPTER_TITLE ${_conItemList.planItemListModels.length}',
                   ),
                 ),
               ),

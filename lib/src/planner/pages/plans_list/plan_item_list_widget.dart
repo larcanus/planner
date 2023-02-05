@@ -96,9 +96,9 @@ class PlanItemListWidget extends StatelessWidget {
                           builder: (BuildContext context) {
                             return ConfirmDlg(
                               key: UniqueKey(),
-                              title: 'Предупреждение',
+                              title: CONFIRM_DELETE_TITLE,
                               description:
-                                  'Вы действительно хотите удалить этот план?',
+                              CONFIRM_DELETE_DESC,
                             );
                           },
                         );
@@ -114,13 +114,13 @@ class PlanItemListWidget extends StatelessWidget {
                       const PopupMenuItem<String>(
                         value: 'edit',
                         child: Text(
-                          'Редактировать',
+                          EDIT_STEP_TITLE_DLG,
                         ),
                       ),
                       const PopupMenuItem<String>(
                         value: 'remove',
                         child: Text(
-                          'Удалить',
+                          DELETE_STEP_TITLE_DLG,
                         ),
                       ),
                     ],
@@ -158,8 +158,8 @@ class PlanItemListWidget extends StatelessWidget {
                     updateWidgetState();
                   },
                   child: isActive
-                      ? const Text('Активен')
-                      : const Text('Активировать'),
+                      ? const Text(PLAN_LIST_ITEM_IS_ACTIVED)
+                      : const Text(PLAN_LIST_ITEM_SET_ACTIVE),
                 ),
                 TextButton(
                   style: TextButton.styleFrom(
@@ -174,7 +174,7 @@ class PlanItemListWidget extends StatelessWidget {
                     );
                   },
                   child: const Text(
-                    'Строить',
+                    PLAN_LIST_ITEM_BUILDING,
                   ),
                 ),
               ],

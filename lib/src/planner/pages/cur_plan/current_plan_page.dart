@@ -1,34 +1,59 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:planner/src/planner/state_manager/plan_controller.dart';
+import '../../constants.dart';
+import 'curr_plan_tree_comp.dart';
 
-class CurrentPlanPage extends StatefulWidget {
-  const CurrentPlanPage({Key? key}) : super(key: key);
-
-  @override
-  State<CurrentPlanPage> createState() => _CurrentPlanPageState();
-}
-
-class _CurrentPlanPageState extends State<CurrentPlanPage> {
+class CurrentPlanPage extends StatelessWidget {
   final PlanController _conItemList = Get.find();
+
+  CurrentPlanPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: true,
+        toolbarHeight: 1,
+      ),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          const Text(
-            'Текущий план: ',
-            style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-          ),
-          Obx(
-            () => Text(
-              _conItemList.currentActiveModelName,
-              style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-            ),
-          ),
+          Expanded(
+              flex: 1,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Text(
+                        TITLE_CURRENT_PLAN,
+                        style: TextStyle(fontSize: 18),
+                      )
+                    ],
+                  ),
+                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                    Obx(
+                      () => Text(
+                        _conItemList.currentActiveModelName,
+                        style: const TextStyle(
+                            fontSize: 23, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ]),
+                ],
+              )),
+          Expanded(
+              flex: 5,
+              child: Container(
+                  color: Colors.red,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      CurrentPlanTree(),
+                    ],
+                  )))
         ],
       ),
     );

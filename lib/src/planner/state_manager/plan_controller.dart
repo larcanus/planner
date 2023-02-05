@@ -15,7 +15,7 @@ class PlanController extends GetxController {
   var _planItemListModels = <PlanItemListModel>[].obs;
   var _itemListWidgets = <Widget>[].obs;
   var _currentActiveModel = null;
-  var _currentActiveModelName = 'Нет активного плана'.obs;
+  var _currentActiveModelName = TITLE_CURRENT_PLAM_IS_NOT_ACTIVE.obs;
   var _selectedStepTools = null;
   var _selectedStep = null;
   var _selectedStepModel = null;
@@ -32,7 +32,7 @@ class PlanController extends GetxController {
     buildSignature: 'Unknown',
     installerStore: 'Unknown',
   );
-  var settings = <String,dynamic>{}.obs;
+  var settings = <String, dynamic>{}.obs;
 
   late Vector2 _canvasSizeDefault;
 
@@ -87,9 +87,8 @@ class PlanController extends GetxController {
   void loadPlanItemModels() async {
     planItemListModels.clear();
     List<dynamic> eternalDataPLan = await getUserPlanData();
-    Map<String,dynamic>? settingsData = await getUserSettingsData();
+    Map<String, dynamic>? settingsData = await getUserSettingsData();
     settings.value = settingsData ?? Settings().toMap();
-
 
     // вариант загрузки руками без хранилища
     // List<PlanItemListModel> eternalDataPLan = [
@@ -202,6 +201,10 @@ class PlanController extends GetxController {
         itemData.planeName = dataName;
         itemData.planeDesc = dataDesc;
         itemData.backgroundColor = dataBackgroundColor;
+
+        if (itemData.isActive) {
+          currentActiveModelName = itemData.planeName;
+        }
         break;
       }
     }
@@ -210,7 +213,17 @@ class PlanController extends GetxController {
   }
 
   void deleteItemListById(id) {
-    planItemListModels.removeWhere((model) => model.id == id);
+    planItemListModels.removeWhere((model) {
+      if (model.id == id) {
+        if (model.isActive) {
+          currentActiveModelName = TITLE_CURRENT_PLAM_IS_NOT_ACTIVE;
+        }
+        return true;
+      } else {
+        return false;
+      }
+    });
+
     updateUserPlansData();
     update();
   }

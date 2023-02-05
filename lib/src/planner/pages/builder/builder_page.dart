@@ -28,7 +28,7 @@ class BuilderPage extends StatelessWidget {
     imageCache.clear();
 
     return Scaffold(
-      appBar: AppBar(title: Text(plan.planeDesc)),
+      appBar: AppBar(title: Text(plan.planeName)),
       body: GameWidget(game: MyGame(plan), overlayBuilderMap: {
         'buttonsStep': (BuildContext context, MyGame game) {
           return Column(mainAxisAlignment: MainAxisAlignment.end, children: [

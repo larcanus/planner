@@ -83,7 +83,7 @@ class _EditPlanDialogState extends State<EditPlanDialog> {
           child: Column(
             children: <Widget>[
               const Text(
-                'Добавить новый план',
+                ADD_EDIT_STEP_ADD_NEW_PLAN,
                 style: TextStyle(fontSize: 23),
               ),
               sizedBoxSpace,
@@ -95,12 +95,12 @@ class _EditPlanDialogState extends State<EditPlanDialog> {
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(5.0)),
                       borderSide: BorderSide(color: Colors.blue)),
-                  labelText: 'Наименование',
+                  labelText: ADD_EDIT_STEP_NAME_DLG,
                 ),
                 keyboardType: TextInputType.text,
                 validator: (String? value) {
                   if (value == null || value.isEmpty) {
-                    return 'Это поле не должно быть пустым';
+                    return ADD_EDIT_STEP_VALID_DLG;
                   }
                   return null;
                 },
@@ -116,7 +116,7 @@ class _EditPlanDialogState extends State<EditPlanDialog> {
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(5.0)),
                       borderSide: BorderSide(color: Colors.blue)),
-                  labelText: 'Краткое описание',
+                  labelText: ADD_EDIT_STEP_DESC_DLG,
                 ),
                 controller: _textFormDescController,
               ),
@@ -140,7 +140,7 @@ class _EditPlanDialogState extends State<EditPlanDialog> {
                     Navigator.pop(context, true);
                   }
                 },
-                child: const Text('Сохранить'),
+                child: const Text(ADD_EDIT_STEP_SAVE_DLG),
               ),
             ],
           ),

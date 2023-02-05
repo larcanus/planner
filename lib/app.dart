@@ -27,7 +27,7 @@ class _FrontPageState extends State<FrontPage> {
   }
 
   static final List<Widget> _widgetOptions = <Widget>[
-    const CurrentPlanPage(),
+    CurrentPlanPage(),
     const PlanListPage(),
     const SettingPage(),
   ];
