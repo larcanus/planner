@@ -105,6 +105,7 @@ const String CONFIRM_DELETE_STEP =
     'Вы действительно хотите удалить этот шаг? Будут удалены и все последующие шаги!';
 const String STEP_TYPE_RECT = 'rect';
 const String STEP_TYPE_CIRCLE = 'circle';
+const double STEP_DECREASE_COF = 1.6;
 
 
 const Color COLOR_BUTTONS_STEP = Color(0xFF0C7391);

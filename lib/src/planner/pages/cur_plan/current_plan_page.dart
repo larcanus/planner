@@ -36,7 +36,7 @@ class CurrentPlanPage extends StatelessWidget {
                   Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                     Obx(
                       () => Text(
-                        _conItemList.currentActiveModelName,
+                        _conItemList.currentActivePlanName,
                         style: const TextStyle(
                             fontSize: 23, fontWeight: FontWeight.bold),
                       ),
@@ -47,13 +47,10 @@ class CurrentPlanPage extends StatelessWidget {
           Expanded(
               flex: 5,
               child: Container(
-                  color: Colors.red,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      CurrentPlanTree(),
-                    ],
-                  )))
+                constraints: const BoxConstraints(minWidth: 200, maxWidth: 1300),
+                color: Colors.white70,
+                child: const CurrentPlanTree(),
+              ))
         ],
       ),
     );

@@ -14,8 +14,8 @@ class PlanController extends GetxController {
   var _selectedTab = 0.obs;
   var _planItemListModels = <PlanItemListModel>[].obs;
   var _itemListWidgets = <Widget>[].obs;
-  var _currentActiveModel = null;
-  var _currentActiveModelName = TITLE_CURRENT_PLAM_IS_NOT_ACTIVE.obs;
+  var _currentActivePlan = null;
+  var _currentActivePlanName = TITLE_CURRENT_PLAM_IS_NOT_ACTIVE.obs;
   var _selectedStepTools = null;
   var _selectedStep = null;
   var _selectedStepModel = null;
@@ -48,13 +48,13 @@ class PlanController extends GetxController {
 
   List<Widget> get itemListWidgets => _itemListWidgets;
 
-  get currentActiveModel => _currentActiveModel;
+  get currentActivePlan => _currentActivePlan;
 
-  set currentActiveModel(model) => _currentActiveModel = model;
+  set currentActivePlan(model) => _currentActivePlan = model;
 
-  get currentActiveModelName => _currentActiveModelName.value;
+  get currentActivePlanName => _currentActivePlanName.value;
 
-  set currentActiveModelName(name) => _currentActiveModelName.value = name;
+  set currentActivePlanName(name) => _currentActivePlanName.value = name;
 
   get selectedStepTools => _selectedStepTools;
 
@@ -119,8 +119,8 @@ class PlanController extends GetxController {
           tree: tree);
       planItemListModels.add(planItemModel);
       if (item['isActive']) {
-        currentActiveModel = planItemModel;
-        currentActiveModelName = planItemModel.planeName;
+        currentActivePlan = planItemModel;
+        currentActivePlanName = planItemModel.planeName;
       }
     }
     update();
@@ -203,7 +203,8 @@ class PlanController extends GetxController {
         itemData.backgroundColor = dataBackgroundColor;
 
         if (itemData.isActive) {
-          currentActiveModelName = itemData.planeName;
+          currentActivePlanName = itemData.planeName;
+          currentActivePlan = itemData;
         }
         break;
       }
@@ -216,7 +217,8 @@ class PlanController extends GetxController {
     planItemListModels.removeWhere((model) {
       if (model.id == id) {
         if (model.isActive) {
-          currentActiveModelName = TITLE_CURRENT_PLAM_IS_NOT_ACTIVE;
+          currentActivePlanName = TITLE_CURRENT_PLAM_IS_NOT_ACTIVE;
+          currentActivePlan = null;
         }
         return true;
       } else {
@@ -233,7 +235,8 @@ class PlanController extends GetxController {
       var itemData = planItemListModels[i];
       if (itemData.id == id) {
         itemData.isActive = true;
-        currentActiveModelName = itemData.planeName;
+        currentActivePlanName = itemData.planeName;
+        currentActivePlan = itemData;
       } else {
         itemData.isActive = false;
       }
@@ -249,7 +252,7 @@ class PlanController extends GetxController {
         return itemData;
       }
     }
-    return currentActiveModel;
+    return currentActivePlan;
   }
 
   getStepById(int id) {
