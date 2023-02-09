@@ -10,7 +10,6 @@ import 'package:planner/src/planner/state_manager/step_model.dart';
 import '../../constants.dart';
 import '../../state_manager/plan_controller.dart';
 import '../../state_manager/plan_item_list_model.dart';
-import '../../state_manager/plan_tree_model.dart';
 
 class CurrentPlanTree extends StatelessWidget {
   const CurrentPlanTree({Key? key}) : super(key: key);
@@ -35,30 +34,86 @@ class TreeActiveStep extends FlameGame with HasTappables {
 
   void buildTree() {
     var activePlan = planController.currentActivePlan;
-    var tree = activePlan.tree;
-    if (tree != null) {
-      setActiveStep(tree);
+    if (activePlan != null) {
+      StepModel activeStep = getActiveStep(activePlan);
+      if (activeStep != null) {
+        planController.currentActiveStep = activeStep;
+        drawActiveStep(activeStep);
+        drawLastSteps(getLastSteps(activeStep));
+        drawNextSteps(getNextSteps(activeStep));
+      } else {
+        Plug();
+      }
     } else {
       Plug();
     }
   }
 
-  setActiveStep(StepModel activeStep) {
+  drawActiveStep(StepModel activeStep) {
     Vector2 centerPos = Vector2(canvasSize.x / 2, canvasSize.y / 2);
 
     if (activeStep.type == STEP_TYPE_RECT) {
-      centerPos = Vector2(canvasSize.x / 2 - activeStep.width / 2 / STEP_DECREASE_COF,
-          canvasSize.y / 2 - activeStep.height / 2 / STEP_DECREASE_COF);
+      centerPos = Vector2(
+          canvasSize.x / 2 - activeStep.width / 2 / STEP_DECREASE_ACTIVE_COF,
+          canvasSize.y / 2 - activeStep.height / 2 / STEP_DECREASE_ACTIVE_COF);
     }
 
     Step step = Step(
       id: activeStep.id,
-      squareWidth: activeStep.width / STEP_DECREASE_COF,
-      squareHeight: activeStep.height / STEP_DECREASE_COF,
+      squareWidth: activeStep.width / STEP_DECREASE_ACTIVE_COF,
+      squareHeight: activeStep.height / STEP_DECREASE_ACTIVE_COF,
       position: centerPos,
       camera: camera,
     );
     add(step);
+  }
+
+  StepModel getActiveStep(PlanItemListModel tree) {
+    return planController.getStepById(tree.activeStep);
+  }
+
+  List<StepModel> getLastSteps(StepModel step) {
+    if (step.parentId == 0) {
+      return [];
+    } else {
+      return [planController.getStepById(step.parentId)];
+    }
+  }
+
+  List getNextSteps(StepModel step) {
+    return step.childs;
+  }
+
+  drawLastSteps(List lastSteps) {
+    for (var step in lastSteps) {
+      Step newStep = Step(
+        id: step.id,
+        squareWidth: step.width / STEP_DECREASE_CHILD_COF,
+        squareHeight: step.height / STEP_DECREASE_CHILD_COF,
+        position: Vector2(100, 100),
+        camera: camera,
+      );
+      add(newStep);
+    }
+  }
+
+  drawNextSteps(List nextSteps) {
+    List<List<double>> listPos = planController.getPositionNextStep(
+        nextSteps.length, canvasSize.x, canvasSize.y);
+    for (int i = 0; i < nextSteps.length; i++) {
+      var step = nextSteps[i];
+      var pos = listPos[i];
+      Vector2 position = Vector2(pos[0] - step.width / STEP_DECREASE_CHILD_COF / 2,
+          pos[1] - step.height / STEP_DECREASE_CHILD_COF / 2);
+      Step newStep = Step(
+        id: step.id,
+        squareWidth: step.width / STEP_DECREASE_CHILD_COF,
+        squareHeight: step.height / STEP_DECREASE_CHILD_COF,
+        position: position,
+        camera: camera,
+      );
+      add(newStep);
+    }
   }
 
   @override

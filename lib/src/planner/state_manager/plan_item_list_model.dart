@@ -6,6 +6,7 @@ class PlanItemListModel {
   String planeDesc;
   int backgroundColor;
   bool isActive;
+  int activeStep;
   StepModel tree;
 
   PlanItemListModel(
@@ -14,6 +15,7 @@ class PlanItemListModel {
       required this.planeDesc,
       required this.backgroundColor,
       required this.tree,
+      required this.activeStep,
       this.isActive = false
       });
 
@@ -23,6 +25,7 @@ class PlanItemListModel {
         planeDesc = json['planeDesc'],
         backgroundColor = json['backgroundColor'],
         tree = json['tree'],
+        activeStep = json['activeStep'],
         isActive = json['isActive'];
 
   Map<String, dynamic> toJson() => {
@@ -31,6 +34,7 @@ class PlanItemListModel {
         'planeDesc': planeDesc,
         'backgroundColor': backgroundColor,
         'tree': tree,
+        'activeStep': activeStep,
         'isActive': isActive,
       };
 }

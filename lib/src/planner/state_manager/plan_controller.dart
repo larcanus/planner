@@ -14,6 +14,7 @@ class PlanController extends GetxController {
   var _selectedTab = 0.obs;
   var _planItemListModels = <PlanItemListModel>[].obs;
   var _itemListWidgets = <Widget>[].obs;
+  var _currentActiveStep = null;
   var _currentActivePlan = null;
   var _currentActivePlanName = TITLE_CURRENT_PLAM_IS_NOT_ACTIVE.obs;
   var _selectedStepTools = null;
@@ -50,7 +51,11 @@ class PlanController extends GetxController {
 
   get currentActivePlan => _currentActivePlan;
 
+  get currentActiveStep => _currentActiveStep;
+
   set currentActivePlan(model) => _currentActivePlan = model;
+
+  set currentActiveStep(model) => _currentActiveStep = model;
 
   get currentActivePlanName => _currentActivePlanName.value;
 
@@ -116,6 +121,7 @@ class PlanController extends GetxController {
           planeDesc: item['planeName'],
           backgroundColor: item['backgroundColor'],
           isActive: item['isActive'],
+          activeStep: item['activeStep'],
           tree: tree);
       planItemListModels.add(planItemModel);
       if (item['isActive']) {
@@ -173,13 +179,15 @@ class PlanController extends GetxController {
   }
 
   addItemList(dataName, dataDesc, dataBackgroundColor) {
+    var idRootStep = UniqueKey().hashCode;
     planItemListModels.add(PlanItemListModel(
         id: UniqueKey().hashCode,
         planeName: dataName,
         planeDesc: dataDesc,
         backgroundColor: dataBackgroundColor,
+        activeStep: idRootStep,
         tree: StepModel(
-          id: UniqueKey().hashCode,
+          id: idRootStep,
           name: NAME_ROOT_STEP,
           description: '',
           background: DEFAULT_BACKGROUND_STEP.toHex(),
@@ -255,7 +263,7 @@ class PlanController extends GetxController {
     return currentActivePlan;
   }
 
-  getStepById(int id) {
+  dynamic getStepById(int id) {
     StepModel rootStep = getRootStep();
     var findChild;
 
@@ -279,7 +287,8 @@ class PlanController extends GetxController {
   }
 
   StepModel getRootStep() {
-    PlanItemListModel plan = selectedPlan;
+    var plan = selectedPlan;
+    plan ??= currentActivePlan;
     return plan.tree;
   }
 
@@ -446,7 +455,7 @@ class PlanController extends GetxController {
     return pos;
   }
 
-  void selectStepById({id, force}) {
+  void selectStepById({id, force = true}) {
     int idStep = id ?? selectedStepModel.id;
     componentsInGame.forEach((comp) {
       if (comp.toString() == 'Step' && comp.id == idStep) {
@@ -880,6 +889,25 @@ class PlanController extends GetxController {
           break;
       }
     }
+  }
+
+  getPositionNextStep(int countChild, canvasW, canvasH) {
+    List<List<double>> pos = [];
+    var centerH = canvasH / 2;
+    var positionX = canvasW - (canvasW / 6);
+    switch (countChild) {
+      case 1:
+        pos.add([positionX, centerH]);
+        break;
+      case 2:
+        break;
+      case 3:
+        break;
+      case 4:
+        break;
+    }
+
+    return pos;
   }
 
   setPositionChildByParentShift(StepModel step, double shift) {
