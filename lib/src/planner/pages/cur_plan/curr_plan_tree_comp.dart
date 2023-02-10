@@ -8,8 +8,10 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:planner/src/planner/state_manager/step_model.dart';
 
 import '../../constants.dart';
+import '../../flame_componets/step_line.dart';
 import '../../state_manager/plan_controller.dart';
 import '../../state_manager/plan_item_list_model.dart';
+import '../../utils.dart';
 
 class CurrentPlanTree extends StatelessWidget {
   const CurrentPlanTree({Key? key}) : super(key: key);
@@ -35,7 +37,7 @@ class TreeActiveStep extends FlameGame with HasTappables {
   void buildTree() {
     var activePlan = planController.currentActivePlan;
     if (activePlan != null) {
-      StepModel activeStep = getActiveStep(activePlan);
+      var activeStep = getActiveStep(activePlan);
       if (activeStep != null) {
         planController.currentActiveStep = activeStep;
         drawActiveStep(activeStep);
@@ -66,10 +68,11 @@ class TreeActiveStep extends FlameGame with HasTappables {
       camera: camera,
     );
     add(step);
+    planController.currentActiveStep = step;
   }
 
-  StepModel getActiveStep(PlanItemListModel tree) {
-    return planController.getStepById(tree.activeStep);
+  dynamic getActiveStep(PlanItemListModel tree) {
+    return planController.getStepById(tree.activeStep, fromActivePlan: true);
   }
 
   List<StepModel> getLastSteps(StepModel step) {
@@ -100,19 +103,39 @@ class TreeActiveStep extends FlameGame with HasTappables {
   drawNextSteps(List nextSteps) {
     List<List<double>> listPos = planController.getPositionNextStep(
         nextSteps.length, canvasSize.x, canvasSize.y);
+    Step currentActStep = planController.currentActiveStep;
     for (int i = 0; i < nextSteps.length; i++) {
       var step = nextSteps[i];
       var pos = listPos[i];
-      Vector2 position = Vector2(pos[0] - step.width / STEP_DECREASE_CHILD_COF / 2,
-          pos[1] - step.height / STEP_DECREASE_CHILD_COF / 2);
+      double stepW = step.width / STEP_DECREASE_CHILD_COF;
+      double stepH = step.height / STEP_DECREASE_CHILD_COF;
+      Vector2 position = Vector2(pos[0] - stepW / 2, pos[1] - stepH / 2);
+
       Step newStep = Step(
         id: step.id,
-        squareWidth: step.width / STEP_DECREASE_CHILD_COF,
-        squareHeight: step.height / STEP_DECREASE_CHILD_COF,
+        squareWidth: stepW,
+        squareHeight: stepH,
         position: position,
         camera: camera,
       );
       add(newStep);
+
+      Vector2 posStart = getPosLineStart({
+        'width': currentActStep.squareWidth,
+        'height': currentActStep.squareHeight,
+        'type': step.type
+      }, currentActStep.position);
+      Vector2 posEnd = getPosLineEnd(
+        {'width': stepW, 'height': stepH, 'type': step.type},
+        currentActStep.position,
+        position,
+      );
+
+      StepLine stepLine = StepLine(
+        positionStart: posStart,
+        positionEnd: posEnd,
+      );
+      add(stepLine);
     }
   }
 

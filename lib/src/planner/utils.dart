@@ -1,4 +1,6 @@
 import 'dart:ui';
+import 'package:flame/components.dart';
+import 'constants.dart';
 
 extension HexColor on Color {
   static Color fromHex(String hexString) {
@@ -19,3 +21,23 @@ extension HexColor on Color {
   }
 }
 
+Vector2 getPosLineStart(Map dataStep, Vector2 pos) {
+  double xPosCenter = pos.x + dataStep['width'];
+  double yPosCenter = pos.y + dataStep['height'] / 2;
+  if (dataStep['type'] == STEP_TYPE_CIRCLE) {
+    yPosCenter = 0;
+  }
+
+  return Vector2(xPosCenter, yPosCenter);
+}
+
+Vector2 getPosLineEnd(Map dataStep, Vector2 posParent, posChild) {
+  double difX = posChild.x - posParent.x - dataStep['width'];
+  double difY = posChild.y - posParent.y;
+  double xPosCenter = dataStep == null ? 0 : difX;
+  double yPosCenter = dataStep == null ? 0 : difY;
+  if (dataStep['type'] == STEP_TYPE_CIRCLE) {
+    yPosCenter = 0;
+  }
+  return Vector2(xPosCenter, yPosCenter);
+}

@@ -11,6 +11,7 @@ import 'package:flame/palette.dart';
 import 'package:planner/src/planner/state_manager/step_model.dart';
 
 import '../../constants.dart';
+import '../../flame_componets/step_line.dart';
 import '../../utils.dart';
 import '../plans_list/confirm_dlg.dart';
 import 'builder_add_edit_step_dlg.dart';
@@ -116,7 +117,7 @@ class BuilderPage extends StatelessWidget {
                         var deltaSize = gameSizeAfter - gameSizeBefore;
                         print('deltaX ${deltaSize}');
 
-                        game.camera.translateBy(-deltaSize/2);
+                        game.camera.translateBy(-deltaSize / 2);
                         game.camera.snap();
                       }
                     },
@@ -141,7 +142,7 @@ class BuilderPage extends StatelessWidget {
                         var deltaSize = gameSizeAfter - gameSizeBefore;
                         print('deltaX ${deltaSize}');
 
-                        game.camera.translateBy(-deltaSize/2);
+                        game.camera.translateBy(-deltaSize / 2);
                         game.camera.snap();
                       }
                       print('button.zoom ${game.camera.zoom}');
@@ -225,8 +226,8 @@ class MyGame extends FlameGame
     // var gg = camera.gameSize;
     // var zom = camera.zoom;
     // var zosm = FixedResolutionViewport;
-    Map<String,dynamic> settings =  planController.settings;
-    if( settings['isShowButtonsScale'] ){
+    Map<String, dynamic> settings = planController.settings;
+    if (settings['isShowButtonsScale']) {
       overlays.add('buttonZoomMax');
       overlays.add('buttonZoomMin');
     }
@@ -270,7 +271,7 @@ class MyGame extends FlameGame
         clampZoom();
         var gameSizeAfter = camera.gameSize;
         var deltaSize = gameSizeAfter - gameSizeBefore;
-        camera.translateBy(-deltaSize/2);
+        camera.translateBy(-deltaSize / 2);
         camera.snap();
       }
     } else {
@@ -323,13 +324,20 @@ class MyGame extends FlameGame
 
     // добавляем линию связи шагов
     StepLine stepLine = StepLine(
-      parentPosition: isRootStep ? Vector2(0, 0) : getGlobalPosStep(parent),
       positionStart: isRootStep
           ? Vector2(0, 0)
-          : getPosLineStart(parent, getGlobalPosStep(parent)),
+          : getPosLineStart({
+              'width': parent.width,
+              'height': parent.height,
+              'type': parent.type
+            }, getGlobalPosStep(parent)),
       positionEnd: isRootStep
           ? Vector2(0, 0)
-          : getPosLineEnd(stepData, getGlobalPosStep(parent), gVectorPosStep),
+          : getPosLineEnd({
+              'width': stepData.width,
+              'height': stepData.height,
+              'type': stepData.type
+            }, getGlobalPosStep(parent), gVectorPosStep),
     );
     add(stepLine);
     planController.componentsInGame.add(stepLine);
@@ -363,27 +371,6 @@ class MyGame extends FlameGame
 
     setWorldBoundsMax(posX, posY);
     return Vector2(posX, posY);
-  }
-
-  Vector2 getPosLineStart(dataStep, pos) {
-    double xPosCenter = pos.x + dataStep.width;
-    double yPosCenter = pos.y + dataStep.height / 2;
-    if (dataStep.type == STEP_TYPE_CIRCLE) {
-      yPosCenter = 0;
-    }
-
-    return Vector2(xPosCenter, yPosCenter);
-  }
-
-  Vector2 getPosLineEnd(dataStep, posParent, posChild) {
-    double difX = posChild.x - posParent.x - dataStep.width;
-    double difY = posChild.y - posParent.y;
-    double xPosCenter = dataStep == null ? 0 : difX;
-    double yPosCenter = dataStep == null ? 0 : difY;
-    if (dataStep?.type == STEP_TYPE_CIRCLE) {
-      yPosCenter = 0;
-    }
-    return Vector2(xPosCenter, yPosCenter);
   }
 
   void refreshTree() {
@@ -528,45 +515,6 @@ class Step extends PositionComponent with Tappable {
   @override
   String toString() {
     return 'Step';
-  }
-}
-
-class StepLine extends PositionComponent {
-  Vector2 parentPosition;
-  Vector2 positionStart;
-  Vector2 positionEnd;
-  Paint stylePaint = Paint()
-    ..strokeWidth = STROKE_BORDER_STEP_TOOLS
-    ..style = PaintingStyle.stroke
-    ..color = COLOR_LINE_BRANCH_STEPS
-    ..strokeWidth = 2;
-  final Path _path = Path();
-
-  StepLine(
-      {required this.parentPosition,
-      required this.positionStart,
-      required this.positionEnd})
-      : super(position: positionStart);
-
-  @override
-  Future<void> onLoad() async {
-    super.onLoad();
-    // print('parentPosition.x----${parentPosition}');
-    // print('positionStart.x----${positionStart}');
-    // print('positionEnd.x----${positionEnd}');
-    buildPath();
-  }
-
-  @override
-  void render(Canvas canvas) {
-    super.render(canvas);
-    canvas.drawPath(_path, stylePaint);
-  }
-
-  void buildPath() {
-    _path
-      ..moveTo(0, 0)
-      ..lineTo(positionEnd.x, positionEnd.y);
   }
 }
 

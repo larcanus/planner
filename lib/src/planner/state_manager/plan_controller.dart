@@ -263,9 +263,9 @@ class PlanController extends GetxController {
     return currentActivePlan;
   }
 
-  dynamic getStepById(int id) {
-    StepModel rootStep = getRootStep();
-    var findChild;
+  StepModel getStepById(int id, {bool fromActivePlan = false}) {
+    StepModel rootStep = getRootStep(fromActivePlan:fromActivePlan);
+    var findChild = rootStep;
 
     recursiveFind(step) {
       if (step.id == id) {
@@ -286,9 +286,11 @@ class PlanController extends GetxController {
     return findChild;
   }
 
-  StepModel getRootStep() {
+  StepModel getRootStep( {bool fromActivePlan = false} ) {
     var plan = selectedPlan;
-    plan ??= currentActivePlan;
+    if( fromActivePlan || selectedPlan == null ){
+      plan = currentActivePlan;
+    }
     return plan.tree;
   }
 
@@ -893,17 +895,35 @@ class PlanController extends GetxController {
 
   getPositionNextStep(int countChild, canvasW, canvasH) {
     List<List<double>> pos = [];
-    var centerH = canvasH / 2;
+    var centerY = canvasH / 2;
     var positionX = canvasW - (canvasW / 6);
     switch (countChild) {
       case 1:
-        pos.add([positionX, centerH]);
+        pos.add([positionX, centerY]);
         break;
       case 2:
+        {
+          double thirdY = canvasH / 3;
+          pos.add([positionX, canvasH - thirdY * 2]);
+          pos.add([positionX, canvasH - thirdY]);
+        }
         break;
       case 3:
+        {
+          double thirdY = canvasH / 3;
+          pos.add([positionX, canvasH - thirdY * 2]);
+          pos.add([positionX, centerY]);
+          pos.add([positionX, canvasH - thirdY]);
+        }
         break;
       case 4:
+        {
+          double fifthY = canvasH / 5;
+          pos.add([positionX, canvasH - fifthY * 4]);
+          pos.add([positionX, canvasH - fifthY * 3]);
+          pos.add([positionX, canvasH - fifthY * 2]);
+          pos.add([positionX, canvasH - fifthY]);
+        }
         break;
     }
 
