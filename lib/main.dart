@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:planner/src/planner/state_manager/plan_controller.dart';
 import 'app.dart';
 
-void main() {
+void main() async {
+  PlanController planController = Get.put(PlanController());
+  await planController.loadPlanItemModels();
   runApp(const MyApp());
 }
 

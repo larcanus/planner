@@ -74,6 +74,7 @@ class PlanController extends GetxController {
   set selectedStepModel(step) => _selectedStepModel = step;
 
   get componentsInGame => _componentsInGame;
+  set componentsInGame(list) => _componentsInGame = list;
 
   get selectedPlan => _selectedPlan;
 
@@ -89,7 +90,7 @@ class PlanController extends GetxController {
     packageInfo = await PackageInfo.fromPlatform();
   }
 
-  void loadPlanItemModels() async {
+  loadPlanItemModels() async {
     planItemListModels.clear();
     List<dynamic> eternalDataPLan = await getUserPlanData();
     Map<String, dynamic>? settingsData = await getUserSettingsData();
@@ -348,6 +349,12 @@ class PlanController extends GetxController {
     }
   }
 
+  setActiveStepBySelectStep(){
+    currentActivePlan.activeStep = selectedStep.id;
+    updateUserPlansData();
+    update();
+  }
+
   saveTree() {
     StepModel cloneModel = StepModel.clone(getRootStep());
 
@@ -460,7 +467,7 @@ class PlanController extends GetxController {
   void selectStepById({id, force = true}) {
     int idStep = id ?? selectedStepModel.id;
     componentsInGame.forEach((comp) {
-      if (comp.toString() == 'Step' && comp.id == idStep) {
+      if (comp.toString() == 'StepRectangle' && comp.id == idStep) {
         comp.selectStep(force: force);
         comp.handlerButtonsStep();
       }
@@ -470,7 +477,7 @@ class PlanController extends GetxController {
   void deleteStepByIdFromComponentsCash({id}) {
     int idStep = id ?? selectedStepModel.id;
     componentsInGame
-        .removeWhere((comp) => comp.toString() == 'Step' && comp.id == idStep);
+        .removeWhere((comp) => comp.toString() == 'StepRectangle' && comp.id == idStep);
     update();
   }
 
@@ -893,7 +900,7 @@ class PlanController extends GetxController {
     }
   }
 
-  getPositionNextStep(int countChild, canvasW, canvasH) {
+  getPositionNextSteps(int countChild, canvasW, canvasH) {
     List<List<double>> pos = [];
     var centerY = canvasH / 2;
     var positionX = canvasW - (canvasW / 6);
@@ -929,6 +936,45 @@ class PlanController extends GetxController {
 
     return pos;
   }
+
+  getPositionLastSteps(int countChild, canvasW, canvasH) {
+    List<List<double>> pos = [];
+    double positionX = canvasW - (canvasW / 6) * 5;
+    double centerY = canvasH / 2;
+
+    switch (countChild) {
+      case 1:
+        pos.add([positionX, centerY]);
+        break;
+      case 2:
+        {
+          double thirdY = canvasH / 3;
+          pos.add([positionX, canvasH - thirdY * 2]);
+          pos.add([positionX, canvasH - thirdY]);
+        }
+        break;
+      case 3:
+        {
+          double thirdY = canvasH / 3;
+          pos.add([positionX, canvasH - thirdY * 2]);
+          pos.add([positionX, centerY]);
+          pos.add([positionX, canvasH - thirdY]);
+        }
+        break;
+      case 4:
+        {
+          double fifthY = canvasH / 5;
+          pos.add([positionX, canvasH - fifthY * 4]);
+          pos.add([positionX, canvasH - fifthY * 3]);
+          pos.add([positionX, canvasH - fifthY * 2]);
+          pos.add([positionX, canvasH - fifthY]);
+        }
+        break;
+    }
+
+    return pos;
+  }
+
 
   setPositionChildByParentShift(StepModel step, double shift) {
     //print('shift $shift ${step.name} ${step.gPosition['y']}');

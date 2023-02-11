@@ -5,66 +5,50 @@ import 'package:planner/src/planner/pages/settings/setting_page.dart';
 import 'package:planner/src/planner/state_manager/plan_controller.dart';
 import 'package:planner/src/planner/pages/plans_list/plan_list_page.dart';
 
-class FrontPage extends StatefulWidget {
+class FrontPage extends StatelessWidget {
   const FrontPage({Key? key}) : super(key: key);
-
-  @override
-  State<FrontPage> createState() => _FrontPageState();
-}
-
-class _FrontPageState extends State<FrontPage> {
-  final PlanController _ctrlItemList = Get.put(PlanController());
-
-  @override
-  initState() {
-    super.initState();
-    _ctrlItemList.loadPlanItemModels();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  static final List<Widget> _widgetOptions = <Widget>[
-    CurrentPlanPage(),
-    const PlanListPage(),
-    const SettingPage(),
-  ];
-
-  var bottomNavigationBarItems = <BottomNavigationBarItem>[
-    const BottomNavigationBarItem(
-      icon: Icon(Icons.directions_walk),
-      label: 'Текущий шаг',
-    ),
-    const BottomNavigationBarItem(
-      icon: Icon(Icons.account_tree_outlined),
-      label: 'Планнер',
-    ),
-    const BottomNavigationBarItem(
-      icon: Icon(Icons.settings),
-      label: 'Настройки',
-      tooltip: 'tooltip',
-    ),
-  ];
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    PlanController planController = Get.find();
+
+    List<BottomNavigationBarItem> bottomNavigationBarItems =
+    <BottomNavigationBarItem>[
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.directions_walk),
+        label: 'Текущий шаг',
+      ),
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.account_tree_outlined),
+        label: 'Планнер',
+      ),
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.settings),
+        label: 'Настройки',
+        tooltip: 'tooltip',
+      ),
+    ];
+
+    List<Widget> pages = <Widget>[
+      const CurrentPlanPage(),
+      const PlanListPage(),
+      const SettingPage(),
+    ];
 
     return Obx(
       () => Scaffold(
         body: Center(
-          child: _widgetOptions.elementAt(_ctrlItemList.selectedTab),
+          child: pages.elementAt(planController.selectedTab),
         ),
         bottomNavigationBar: BottomNavigationBar(
           showUnselectedLabels: false,
           showSelectedLabels: true,
           items: bottomNavigationBarItems,
-          currentIndex: _ctrlItemList.selectedTab,
+          currentIndex: planController.selectedTab,
           type: BottomNavigationBarType.fixed,
           onTap: (index) {
-            _ctrlItemList.selectedTab = index;
+            planController.selectedTab = index;
           },
           selectedItemColor: colorScheme.onPrimary,
           unselectedItemColor: colorScheme.onPrimary.withOpacity(0.38),

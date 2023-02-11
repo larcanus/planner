@@ -5,12 +5,12 @@ import '../../constants.dart';
 import 'curr_plan_tree_comp.dart';
 
 class CurrentPlanPage extends StatelessWidget {
-  final PlanController _conItemList = Get.find();
-
-  CurrentPlanPage({Key? key}) : super(key: key);
+  const CurrentPlanPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final PlanController planController = Get.find();
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: true,
@@ -36,7 +36,7 @@ class CurrentPlanPage extends StatelessWidget {
                   Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                     Obx(
                       () => Text(
-                        _conItemList.currentActivePlanName,
+                        planController.currentActivePlanName,
                         style: const TextStyle(
                             fontSize: 23, fontWeight: FontWeight.bold),
                       ),

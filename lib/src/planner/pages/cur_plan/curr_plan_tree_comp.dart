@@ -9,6 +9,7 @@ import 'package:planner/src/planner/state_manager/step_model.dart';
 
 import '../../constants.dart';
 import '../../flame_componets/step_line.dart';
+import '../../flame_componets/step_rectangle.dart';
 import '../../state_manager/plan_controller.dart';
 import '../../state_manager/plan_item_list_model.dart';
 import '../../utils.dart';
@@ -18,7 +19,29 @@ class CurrentPlanTree extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GameWidget(game: TreeActiveStep());
+    final PlanController planController = Get.find();
+    return GameWidget(game: TreeActiveStep(), overlayBuilderMap: {
+      'buttonActivate': (BuildContext context, TreeActiveStep game) {
+        return Column(mainAxisAlignment: MainAxisAlignment.end, children: [
+          Container(
+              margin: const EdgeInsets.all(23),
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    FloatingActionButton(
+                      heroTag: 'btn1',
+                      onPressed: () {
+                        planController.setActiveStepBySelectStep();
+
+                        game.refreshTree();
+                      },
+                      backgroundColor: Colors.green,
+                      child: const Text('ACTIVATE'),
+                    ),
+                  ]))
+        ]);
+      }
+    });
   }
 }
 
@@ -34,12 +57,15 @@ class TreeActiveStep extends FlameGame with HasTappables {
     buildTree();
   }
 
+  @override
+  Future<void> onMount() async {}
+
   void buildTree() {
     var activePlan = planController.currentActivePlan;
     if (activePlan != null) {
       var activeStep = getActiveStep(activePlan);
       if (activeStep != null) {
-        planController.currentActiveStep = activeStep;
+        planController.componentsInGame = [];
         drawActiveStep(activeStep);
         drawLastSteps(getLastSteps(activeStep));
         drawNextSteps(getNextSteps(activeStep));
@@ -51,6 +77,15 @@ class TreeActiveStep extends FlameGame with HasTappables {
     }
   }
 
+  void refreshTree() {
+    var allComponents = planController.componentsInGame;
+    allComponents.forEach((comp) {
+      comp.removeFromParent();
+      // this.remove(comp);
+    });
+    buildTree();
+  }
+
   drawActiveStep(StepModel activeStep) {
     Vector2 centerPos = Vector2(canvasSize.x / 2, canvasSize.y / 2);
 
@@ -60,7 +95,7 @@ class TreeActiveStep extends FlameGame with HasTappables {
           canvasSize.y / 2 - activeStep.height / 2 / STEP_DECREASE_ACTIVE_COF);
     }
 
-    Step step = Step(
+    StepRectangleFrontPage step = StepRectangleFrontPage(
       id: activeStep.id,
       squareWidth: activeStep.width / STEP_DECREASE_ACTIVE_COF,
       squareHeight: activeStep.height / STEP_DECREASE_ACTIVE_COF,
@@ -69,6 +104,7 @@ class TreeActiveStep extends FlameGame with HasTappables {
     );
     add(step);
     planController.currentActiveStep = step;
+    planController.componentsInGame.add(step);
   }
 
   dynamic getActiveStep(PlanItemListModel tree) {
@@ -88,22 +124,54 @@ class TreeActiveStep extends FlameGame with HasTappables {
   }
 
   drawLastSteps(List lastSteps) {
-    for (var step in lastSteps) {
-      Step newStep = Step(
+    List<List<double>> listPos = planController.getPositionLastSteps(
+        lastSteps.length, canvasSize.x, canvasSize.y);
+    StepRectangleFrontPage currentActStep = planController.currentActiveStep;
+
+    for (int i = 0; i < lastSteps.length; i++) {
+      var step = lastSteps[i];
+      var pos = listPos[i];
+      double stepW = step.width / STEP_DECREASE_CHILD_COF;
+      double stepH = step.height / STEP_DECREASE_CHILD_COF;
+      Vector2 position = Vector2(pos[0] - stepW / 2, pos[1] - stepH / 2);
+
+      StepRectangleFrontPage newStep = StepRectangleFrontPage(
         id: step.id,
         squareWidth: step.width / STEP_DECREASE_CHILD_COF,
         squareHeight: step.height / STEP_DECREASE_CHILD_COF,
-        position: Vector2(100, 100),
+        position: position,
         camera: camera,
       );
       add(newStep);
+      planController.componentsInGame.add(newStep);
+
+      Vector2 posStart = getPosLineStart({
+        'width': stepW,
+        'height': stepH,
+        'type': step.type // TODO add check by type
+      }, position);
+
+      Vector2 posEnd = getPosLineEnd(
+        {'width': stepW, 'type': step.type},
+        position,
+        currentActStep.position,
+      );
+
+      double difParentChildHeight = currentActStep.height - stepH;
+      StepLine stepLine = StepLine(
+        positionStart: posStart,
+        positionEnd: Vector2(posEnd.x, posEnd.y + difParentChildHeight / 2),
+      );
+      add(stepLine);
+      planController.componentsInGame.add(stepLine);
     }
   }
 
   drawNextSteps(List nextSteps) {
-    List<List<double>> listPos = planController.getPositionNextStep(
+    List<List<double>> listPos = planController.getPositionNextSteps(
         nextSteps.length, canvasSize.x, canvasSize.y);
-    Step currentActStep = planController.currentActiveStep;
+    StepRectangleFrontPage currentActStep = planController.currentActiveStep;
+
     for (int i = 0; i < nextSteps.length; i++) {
       var step = nextSteps[i];
       var pos = listPos[i];
@@ -111,7 +179,7 @@ class TreeActiveStep extends FlameGame with HasTappables {
       double stepH = step.height / STEP_DECREASE_CHILD_COF;
       Vector2 position = Vector2(pos[0] - stepW / 2, pos[1] - stepH / 2);
 
-      Step newStep = Step(
+      StepRectangleFrontPage newStep = StepRectangleFrontPage(
         id: step.id,
         squareWidth: stepW,
         squareHeight: stepH,
@@ -123,17 +191,18 @@ class TreeActiveStep extends FlameGame with HasTappables {
       Vector2 posStart = getPosLineStart({
         'width': currentActStep.squareWidth,
         'height': currentActStep.squareHeight,
-        'type': step.type
+        'type': step.type // TODO add check by type
       }, currentActStep.position);
       Vector2 posEnd = getPosLineEnd(
-        {'width': stepW, 'height': stepH, 'type': step.type},
+        {'width': currentActStep.width, 'type': step.type},
         currentActStep.position,
         position,
       );
 
+      double difParentChildHeight = currentActStep.height - stepH;
       StepLine stepLine = StepLine(
         positionStart: posStart,
-        positionEnd: posEnd,
+        positionEnd: Vector2(posEnd.x, posEnd.y - difParentChildHeight / 2),
       );
       add(stepLine);
     }
@@ -142,51 +211,15 @@ class TreeActiveStep extends FlameGame with HasTappables {
   @override
   void onTapDown(int pointerId, TapDownInfo info) {
     super.onTapDown(pointerId, info);
+    if (overlays.isActive('buttonActivate') && !info.handled) {
+      overlays.remove('buttonActivate');
+    }
+
     // print('widget----${info.eventPosition.widget}');
     // print('global---${info.eventPosition.global}');
-    print('game---${info.eventPosition.game}');
+    // print('game---${info.eventPosition.game}');
     // print('camera.position gg ---- ${camera.position}');
     print('canvas x y === ${canvasSize.x} ${canvasSize.y}');
-  }
-}
-
-class Step extends PositionComponent with Tappable {
-  int id;
-  double squareWidth = 100.0;
-  double squareHeight = 100.0;
-  Camera camera;
-
-  Step(
-      {required this.id,
-      required Vector2 position,
-      required this.squareWidth,
-      required this.squareHeight,
-      required this.camera})
-      : super(position: position);
-  static Paint black = BasicPalette.black.paint();
-
-  @override
-  void render(Canvas canvas) {
-    super.render(canvas);
-    canvas.drawRect(size.toRect(), black);
-  }
-
-  @override
-  Future<void> onLoad() async {
-    super.onLoad();
-    size.setValues(squareWidth, squareHeight);
-  }
-
-  @override
-  bool onTapDown(TapDownInfo info) {
-    super.onTapDown(info);
-    print('stepPosition.x----${position}');
-    return true;
-  }
-
-  @override
-  String toString() {
-    return 'Step';
   }
 }
 

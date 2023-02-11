@@ -12,6 +12,7 @@ import 'package:planner/src/planner/state_manager/step_model.dart';
 
 import '../../constants.dart';
 import '../../flame_componets/step_line.dart';
+import '../../flame_componets/step_rectangle.dart';
 import '../../utils.dart';
 import '../plans_list/confirm_dlg.dart';
 import 'builder_add_edit_step_dlg.dart';
@@ -216,6 +217,7 @@ class MyGame extends FlameGame
     debugMode = true;
     camera.speed = 450;
     planController.canvasSizeDefault = Vector2(canvasSize.x, canvasSize.y);
+    planController.componentsInGame = [];
     buildTree();
     // onGameResize(Vector2(1000, 1500));
     // camera.viewport = FixedResolutionViewport(Vector2(400, 700));
@@ -312,7 +314,7 @@ class MyGame extends FlameGame
         stepData.gPosition['x'] == 500.0 && stepData.gPosition['y'] == 500.0;
 
     // добавляем шаг
-    Step step = Step(
+    StepRectangle step = StepRectangle(
       id: stepData.id,
       squareWidth: stepData.width,
       squareHeight: stepData.height,
@@ -416,105 +418,6 @@ class MyGame extends FlameGame
     if (overlays.isActive('editStepOverlay')) {
       overlays.remove('editStepOverlay');
     }
-  }
-}
-
-class Step extends PositionComponent with Tappable {
-  int id;
-  double squareWidth = 100.0;
-  double squareHeight = 100.0;
-  Camera camera;
-  final PlanController planController = Get.find();
-
-  Step(
-      {required this.id,
-      required Vector2 position,
-      required this.squareWidth,
-      required this.squareHeight,
-      required this.camera})
-      : super(position: position);
-  static Paint white = BasicPalette.white.paint();
-
-  @override
-  void render(Canvas canvas) {
-    super.render(canvas);
-    canvas.drawRect(size.toRect(), white);
-  }
-
-  @override
-  Future<void> onLoad() async {
-    super.onLoad();
-    size.setValues(squareWidth, squareHeight);
-  }
-
-  @override
-  bool onTapDown(TapDownInfo info) {
-    super.onTapDown(info);
-    planController.selectedStep = null;
-    // print('parentPosition.x----${parentPosition}');
-    // print('stepPosition.x----${position}');
-
-    if (!info.handled) {
-      selectStep();
-    }
-    handlerButtonsStep();
-    return true;
-  }
-
-  void selectStep({force = false}) {
-    final touchPoint = Vector2(0, 0);
-    Vector2 sizeTools = Vector2(squareWidth, squareHeight);
-    double posWidgetGlobalX = position.x + squareWidth / 2;
-    double posWidgetGlobalY = position.y + squareHeight / 2;
-
-    Vector2 centerWidgetScreenPos2 = Vector2(
-        posWidgetGlobalX - camera.gameSize[0] / 2,
-        posWidgetGlobalY - camera.gameSize[1] / 2);
-    camera.moveTo(centerWidgetScreenPos2);
-    if (force) {
-      camera.snap();
-    }
-    StepTools stepTools = StepTools(position: touchPoint, size: sizeTools);
-    add(stepTools);
-
-    final selectedStepTools = planController.selectedStepTools;
-    if (selectedStepTools != null) {
-      selectedStepTools.removeFromParent();
-    }
-    planController.selectedStepTools = stepTools;
-    planController.selectedStep = this;
-    planController.selectedStepModel = planController.getStepById(id);
-  }
-
-  void handlerButtonsStep() {
-    Game? game = findGame();
-    var over = game?.overlays;
-    Step? selectedStep = planController.selectedStep;
-    if (over != null && selectedStep != null) {
-      over.add('buttonsStep');
-    } else {
-      if (over != null && over.isActive('buttonsStep')) {
-        over.remove('buttonsStep');
-      }
-    }
-  }
-
-  @override
-  bool onTapUp(TapUpInfo info) {
-    super.onTapUp(info);
-    double posWidgetGlobalX = position.x + squareWidth / 2;
-    double posWidgetGlobalY = position.y + squareHeight / 2;
-    Vector2 centerWidgetScreenPos2 = Vector2(
-        posWidgetGlobalX - camera.gameSize[0] / 2,
-        posWidgetGlobalY - camera.gameSize[1] / 2);
-    camera.moveTo(centerWidgetScreenPos2);
-
-    return true;
-  }
-
-  @override
-  String toString() {
-    return 'Step';
   }
 }
 

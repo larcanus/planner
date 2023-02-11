@@ -20,9 +20,6 @@ class StepLine extends PositionComponent {
   @override
   Future<void> onLoad() async {
     super.onLoad();
-    // print('parentPosition.x----${parentPosition}');
-    // print('positionStart.x----${positionStart}');
-    // print('positionEnd.x----${positionEnd}');
     buildPath();
   }
 
