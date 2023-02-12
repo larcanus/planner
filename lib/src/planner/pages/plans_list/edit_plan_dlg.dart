@@ -20,7 +20,8 @@ class EditPlanDialog extends StatefulWidget {
 class _EditPlanDialogState extends State<EditPlanDialog> {
   final _formKey = GlobalKey<FormState>();
   final PlanController contItemList = Get.find();
-  final TextEditingController _textFormTitleController = TextEditingController();
+  final TextEditingController _textFormTitleController =
+      TextEditingController();
   final TextEditingController _textFormDescController = TextEditingController();
   Color currentColor = const Color(0xffb599d6);
 
@@ -58,9 +59,9 @@ class _EditPlanDialogState extends State<EditPlanDialog> {
   contentBox(context) {
     const sizedBoxSpace = SizedBox(height: 14);
 
-    List<Color> getColorConstant(){
-      List<Color> colors= [];
-      for(var item in COLORS_GRADIENT.entries){
+    List<Color> getColorConstant() {
+      List<Color> colors = [];
+      for (var item in COLORS_GRADIENT.entries) {
         colors.add(Color(item.key));
       }
       return colors;
@@ -71,7 +72,7 @@ class _EditPlanDialogState extends State<EditPlanDialog> {
       margin: const EdgeInsets.only(top: 10),
       decoration: BoxDecoration(
           shape: BoxShape.rectangle,
-          color: Colors.white,
+          color: DEFAULT_SCAFFOLD_BACKGROUND,
           borderRadius: BorderRadius.circular(15),
           boxShadow: const [
             BoxShadow(
@@ -93,9 +94,11 @@ class _EditPlanDialogState extends State<EditPlanDialog> {
                 maxLength: 30,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                      borderSide: BorderSide(color: Colors.blue)),
+                      borderRadius: BorderRadius.all(Radius.circular(5.0))),
                   labelText: ADD_EDIT_STEP_NAME_DLG,
+                  enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                      borderSide: BorderSide(color: COLOR_BORDER_ENABLED_DLG)),
                 ),
                 keyboardType: TextInputType.text,
                 validator: (String? value) {
@@ -114,8 +117,10 @@ class _EditPlanDialogState extends State<EditPlanDialog> {
                 maxLength: 100,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(5.0))),
+                  enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                      borderSide: BorderSide(color: Colors.blue)),
+                      borderSide: BorderSide(color: COLOR_BORDER_ENABLED_DLG)),
                   labelText: ADD_EDIT_STEP_DESC_DLG,
                 ),
                 controller: _textFormDescController,
@@ -133,8 +138,11 @@ class _EditPlanDialogState extends State<EditPlanDialog> {
                       contItemList.addItemList(_textFormTitleController.text,
                           _textFormDescController.text, currentColor.value);
                     } else {
-                      contItemList.updateItemListById(id, _textFormTitleController.text,
-                          _textFormDescController.text, currentColor.value);
+                      contItemList.updateItemListById(
+                          id,
+                          _textFormTitleController.text,
+                          _textFormDescController.text,
+                          currentColor.value);
                     }
 
                     Navigator.pop(context, true);

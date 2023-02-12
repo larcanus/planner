@@ -35,7 +35,6 @@ class _StepEditDlgState extends State<StepEditDlg> {
       TextEditingController();
   final TextEditingController _textFormDescController = TextEditingController();
 
-
   late final String title;
   late Color currentColor;
   late final String? name, description;
@@ -107,8 +106,10 @@ class _StepEditDlgState extends State<StepEditDlg> {
                 maxLength: 30,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(5.0))),
+                  enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                      borderSide: BorderSide(color: COLOR_BORDER_EDIT_STEP_DLG)),
+                      borderSide: BorderSide(color: COLOR_BORDER_ENABLED_DLG)),
                   labelText: ADD_EDIT_STEP_NAME_DLG,
                 ),
                 keyboardType: TextInputType.text,
@@ -128,8 +129,10 @@ class _StepEditDlgState extends State<StepEditDlg> {
                 maxLength: 100,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(5.0))),
+                  enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                      borderSide: BorderSide(color: COLOR_BORDER_EDIT_STEP_DLG)),
+                      borderSide: BorderSide(color: COLOR_BORDER_ENABLED_DLG)),
                   labelText: ADD_EDIT_STEP_DESC_DLG,
                 ),
                 controller: _textFormDescController,

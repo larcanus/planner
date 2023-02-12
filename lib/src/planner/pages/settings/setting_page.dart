@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:planner/src/planner/state_manager/plan_controller.dart';
@@ -12,6 +11,7 @@ class SettingPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final PlanController planController = Get.find();
     return Scaffold(
+      backgroundColor: DEFAULT_SCAFFOLD_BACKGROUND,
       appBar: AppBar(
         automaticallyImplyLeading: true,
         toolbarHeight: 1,
@@ -40,7 +40,7 @@ class SettingPage extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(SETTING_VERSION),
+                  const Text(SETTING_VERSION),
                   Text(planController.packageInfo.version),
                 ],
               ),

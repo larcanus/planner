@@ -1,4 +1,3 @@
-import 'package:flame/collisions.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:planner/src/planner/state_manager/plan_controller.dart';
@@ -7,12 +6,12 @@ import 'package:planner/src/planner/state_manager/plan_item_list_model.dart';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flame/input.dart';
-import 'package:flame/palette.dart';
 import 'package:planner/src/planner/state_manager/step_model.dart';
 
 import '../../constants.dart';
 import '../../flame_componets/step_line.dart';
 import '../../flame_componets/step_rectangle.dart';
+import '../../flame_componets/step_text_box.dart';
 import '../../utils.dart';
 import '../plans_list/confirm_dlg.dart';
 import 'builder_add_edit_step_dlg.dart';
@@ -350,7 +349,7 @@ class MyGame extends FlameGame
     //
     // Vector2 gVectorPosText = Vector2(gPosTextX, gPosTextY);
     TextComponent textStep = TextBoxStep(stepData.name, gVectorPosStep,
-        stepData.background, Vector2(step.width, step.height));
+        stepData.background, Vector2(step.width, step.height),STEP_TEXT_BOX_FONT_SIZE);
 
     add(textStep);
 
@@ -449,40 +448,5 @@ class StepTools extends PositionComponent with Tappable {
     removeFromParent();
     info.handled = true;
     return true;
-  }
-}
-
-class TextBoxStep extends TextBoxComponent {
-  String background;
-
-  TextBoxStep(
-    String text,
-    Vector2 position,
-    this.background,
-    size, {
-    double? timePerChar,
-    double? margins,
-  }) : super(
-          position: position,
-          text: text,
-          size: size,
-          align: Anchor.center,
-          textRenderer: TextPaint(
-              style: const TextStyle(
-            fontSize: 18,
-            color: COLOR_NAME_STEP,
-          )),
-          boxConfig: TextBoxConfig(
-            maxWidth: 180,
-            growingBox: true,
-            margins: EdgeInsets.all(margins ?? 25),
-          ),
-        );
-
-  @override
-  void render(Canvas c) {
-    final rect = Rect.fromLTWH(0, 0, width, height);
-    c.drawRect(rect, Paint()..color = HexColor.fromHex(background));
-    super.render(c);
   }
 }

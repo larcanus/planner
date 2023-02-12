@@ -12,6 +12,7 @@ class CurrentPlanPage extends StatelessWidget {
     final PlanController planController = Get.find();
 
     return Scaffold(
+      backgroundColor: DEFAULT_SCAFFOLD_BACKGROUND,
       appBar: AppBar(
         automaticallyImplyLeading: true,
         toolbarHeight: 1,
@@ -48,7 +49,6 @@ class CurrentPlanPage extends StatelessWidget {
               flex: 5,
               child: Container(
                 constraints: const BoxConstraints(minWidth: 200, maxWidth: 1300),
-                color: Colors.white70,
                 child: const CurrentPlanTree(),
               ))
         ],

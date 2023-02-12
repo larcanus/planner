@@ -10,6 +10,7 @@ import 'package:planner/src/planner/state_manager/step_model.dart';
 import '../../constants.dart';
 import '../../flame_componets/step_line.dart';
 import '../../flame_componets/step_rectangle.dart';
+import '../../flame_componets/step_text_box.dart';
 import '../../state_manager/plan_controller.dart';
 import '../../state_manager/plan_item_list_model.dart';
 import '../../utils.dart';
@@ -49,11 +50,10 @@ class TreeActiveStep extends FlameGame with HasTappables {
   final PlanController planController = Get.find();
 
   @override
-  Color backgroundColor() => DEFAULT_BACKGROUND_BUILDER;
+  Color backgroundColor() => DEFAULT_BACKGROUND_BUILDER_FRONT_PAGE;
 
   @override
   Future<void> onLoad() async {
-    debugMode = true;
     buildTree();
   }
 
@@ -81,12 +81,18 @@ class TreeActiveStep extends FlameGame with HasTappables {
     var allComponents = planController.componentsInGame;
     allComponents.forEach((comp) {
       comp.removeFromParent();
-      // this.remove(comp);
     });
+    if (overlays.isActive('buttonActivate')) {
+      overlays.remove('buttonActivate');
+    }
     buildTree();
   }
 
-  drawActiveStep(StepModel activeStep) {
+  dynamic getActiveStep(PlanItemListModel tree) {
+    return planController.getStepById(tree.activeStep, fromActivePlan: true);
+  }
+
+  void drawActiveStep(StepModel activeStep) {
     Vector2 centerPos = Vector2(canvasSize.x / 2, canvasSize.y / 2);
 
     if (activeStep.type == STEP_TYPE_RECT) {
@@ -105,10 +111,15 @@ class TreeActiveStep extends FlameGame with HasTappables {
     add(step);
     planController.currentActiveStep = step;
     planController.componentsInGame.add(step);
-  }
 
-  dynamic getActiveStep(PlanItemListModel tree) {
-    return planController.getStepById(tree.activeStep, fromActivePlan: true);
+    TextComponent textStep = TextBoxStep(
+        activeStep.name,
+        centerPos,
+        activeStep.background,
+        Vector2(step.width, step.height),
+        TEXT_BOX_FONT_SIZE_ACTIVE_STEP);
+    add(textStep);
+    planController.componentsInGame.add(textStep);
   }
 
   List<StepModel> getLastSteps(StepModel step) {
@@ -123,7 +134,7 @@ class TreeActiveStep extends FlameGame with HasTappables {
     return step.childs;
   }
 
-  drawLastSteps(List lastSteps) {
+  void drawLastSteps(List lastSteps) {
     List<List<double>> listPos = planController.getPositionLastSteps(
         lastSteps.length, canvasSize.x, canvasSize.y);
     StepRectangleFrontPage currentActStep = planController.currentActiveStep;
@@ -164,10 +175,16 @@ class TreeActiveStep extends FlameGame with HasTappables {
       );
       add(stepLine);
       planController.componentsInGame.add(stepLine);
+
+      TextComponent textStep = TextBoxStep(step.name, position, step.background,
+          Vector2(stepW, stepH), TEXT_BOX_FONT_SIZE_LAST_NEXT_STEP);
+
+      add(textStep);
+      planController.componentsInGame.add(textStep);
     }
   }
 
-  drawNextSteps(List nextSteps) {
+  void drawNextSteps(List nextSteps) {
     List<List<double>> listPos = planController.getPositionNextSteps(
         nextSteps.length, canvasSize.x, canvasSize.y);
     StepRectangleFrontPage currentActStep = planController.currentActiveStep;
@@ -187,6 +204,7 @@ class TreeActiveStep extends FlameGame with HasTappables {
         camera: camera,
       );
       add(newStep);
+      planController.componentsInGame.add(newStep);
 
       Vector2 posStart = getPosLineStart({
         'width': currentActStep.squareWidth,
@@ -205,6 +223,13 @@ class TreeActiveStep extends FlameGame with HasTappables {
         positionEnd: Vector2(posEnd.x, posEnd.y - difParentChildHeight / 2),
       );
       add(stepLine);
+      planController.componentsInGame.add(stepLine);
+
+      TextComponent textStep = TextBoxStep(step.name, position, step.background,
+          Vector2(stepW, stepH), TEXT_BOX_FONT_SIZE_LAST_NEXT_STEP);
+
+      add(textStep);
+      planController.componentsInGame.add(textStep);
     }
   }
 
@@ -219,7 +244,7 @@ class TreeActiveStep extends FlameGame with HasTappables {
     // print('global---${info.eventPosition.global}');
     // print('game---${info.eventPosition.game}');
     // print('camera.position gg ---- ${camera.position}');
-    print('canvas x y === ${canvasSize.x} ${canvasSize.y}');
+    // print('canvas x y === ${canvasSize.x} ${canvasSize.y}');
   }
 }
 

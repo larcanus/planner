@@ -26,14 +26,14 @@ class _PlanListPageState extends State<PlanListPage> {
     return GetBuilder<PlanController>(
       init: _conItemList,
       builder: (controller) => Scaffold(
+        backgroundColor: DEFAULT_SCAFFOLD_BACKGROUND,
         body: CustomScrollView(
           slivers: <Widget>[
             const SliverAppBar(
               pinned: true,
-              expandedHeight: 160.0,
+              expandedHeight: 100.0,
               flexibleSpace: FlexibleSpaceBar(
                 title: Text(SLIVER_APP_BAR_TITLE),
-                background: FlutterLogo(),
               ),
             ),
             SliverToBoxAdapter(

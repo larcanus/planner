@@ -97,8 +97,7 @@ class PlanItemListWidget extends StatelessWidget {
                             return ConfirmDlg(
                               key: UniqueKey(),
                               title: CONFIRM_DELETE_TITLE,
-                              description:
-                              CONFIRM_DELETE_DESC,
+                              description: CONFIRM_DELETE_DESC,
                             );
                           },
                         );
@@ -158,8 +157,16 @@ class PlanItemListWidget extends StatelessWidget {
                     updateWidgetState();
                   },
                   child: isActive
-                      ? const Text(PLAN_LIST_ITEM_IS_ACTIVED)
-                      : const Text(PLAN_LIST_ITEM_SET_ACTIVE),
+                      ? const Text(PLAN_LIST_ITEM_IS_ACTIVED,
+                          style: TextStyle(
+                            color: Color(0xFF120E4E), // зеленый цвет текста
+                            fontSize: 16, // высота шрифта 26
+                          ))
+                      : const Text(PLAN_LIST_ITEM_SET_ACTIVE,
+                          style: TextStyle(
+                            color: Color(0xFF120E4E), // зеленый цвет текста
+                            fontSize: 16, // высота шрифта 26
+                          )),
                 ),
                 TextButton(
                   style: TextButton.styleFrom(
@@ -169,13 +176,14 @@ class PlanItemListWidget extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => BuilderPage(  selectPlanId: id )
-                      ),
+                          builder: (context) => BuilderPage(selectPlanId: id)),
                     );
                   },
-                  child: const Text(
-                    PLAN_LIST_ITEM_BUILDING,
-                  ),
+                  child: const Text(PLAN_LIST_ITEM_BUILDING,
+                      style: TextStyle(
+                        color: Color(0xFF120E4E), // зеленый цвет текста
+                        fontSize: 16, // высота шрифта 26
+                      )),
                 ),
               ],
             ),
