@@ -106,20 +106,19 @@ class StepRectangle extends PositionComponent with Tappable {
   }
 }
 
-
 class StepRectangleFrontPage extends StepRectangle {
   StepRectangleFrontPage(
       {required id,
-        required Vector2 position,
-        required squareWidth,
-        required squareHeight,
-        required camera})
+      required Vector2 position,
+      required squareWidth,
+      required squareHeight,
+      required camera})
       : super(
-      id: id,
-      squareWidth: squareWidth,
-      squareHeight: squareHeight,
-      camera: camera,
-      position: position);
+            id: id,
+            squareWidth: squareWidth,
+            squareHeight: squareHeight,
+            camera: camera,
+            position: position);
   static Paint black = BasicPalette.black.paint();
 
   @override
@@ -140,12 +139,23 @@ class StepRectangleFrontPage extends StepRectangle {
     Game? game = findGame();
     var over = game?.overlays;
     int idActiveStep = planController.currentActiveStep.id;
-    if ( over != null && id != idActiveStep ) {
+    if (over != null && id != idActiveStep) {
       info.handled = true;
-      over.add('buttonActivate');
       planController.selectedStep = this;
+      planController.setStepModelById(id);
+
+      if (over.isActive('buttonActivate')) {
+        over.remove('buttonActivate');
+      }
+      if (over.isActive('stepInfo')) {
+        over.remove('stepInfo');
+      }
+
+      over.add('stepInfo');
+      over.add('buttonActivate');
     } else {
       over?.remove('buttonActivate');
+      over?.remove('stepInfo');
     }
     return true;
   }

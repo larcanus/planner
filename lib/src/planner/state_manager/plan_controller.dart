@@ -474,6 +474,10 @@ class PlanController extends GetxController {
     });
   }
 
+  setStepModelById(int id){
+    selectedStepModel = getStepById(id, fromActivePlan: true);
+  }
+
   void deleteStepByIdFromComponentsCash({id}) {
     int idStep = id ?? selectedStepModel.id;
     componentsInGame
@@ -925,11 +929,11 @@ class PlanController extends GetxController {
         break;
       case 4:
         {
-          double fifthY = canvasH / 5;
+          double fifthY = canvasH / 7;
+          pos.add([positionX, canvasH - fifthY * 5]);
           pos.add([positionX, canvasH - fifthY * 4]);
           pos.add([positionX, canvasH - fifthY * 3]);
           pos.add([positionX, canvasH - fifthY * 2]);
-          pos.add([positionX, canvasH - fifthY]);
         }
         break;
     }

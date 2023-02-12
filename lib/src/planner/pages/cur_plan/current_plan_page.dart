@@ -46,7 +46,7 @@ class CurrentPlanPage extends StatelessWidget {
                 ],
               )),
           Expanded(
-              flex: 5,
+              flex: 6,
               child: Container(
                 constraints: const BoxConstraints(minWidth: 200, maxWidth: 1300),
                 child: const CurrentPlanTree(),

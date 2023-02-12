@@ -76,6 +76,8 @@ const String TITLE_CURRENT_PLAM_IS_NOT_ACTIVE = 'Активных нет';
 
 /// current page
 const String TITLE_CURRENT_PLAN = 'Текущий:';
+const String DEFAULT_STEP_INFO_DESC = 'нет описания';
+const String TITLE_BUTTON_ACTIVE = 'Переход';
 
 /// plan lists page
 const String SLIVER_APP_BAR_TITLE = 'Ваши планы:';
@@ -114,6 +116,7 @@ const double STROKE_BORDER_STEP_TOOLS = 6.0;
 
 
 const Color COLOR_BUTTONS_STEP = Color(0xFF0C7391);
+const Color COLOR_BUTTON_ACTIVATE = Color(0xFFE73030);
 const Color DEFAULT_SCAFFOLD_BACKGROUND = Color(0xfffff7f7);
 const Color DEFAULT_BACKGROUND_STEP = Color(0xFF728FAD);
 const Color DEFAULT_BACKGROUND_BUILDER = Color(0xffD3D3D3);
@@ -123,3 +126,5 @@ const Color COLOR_LINE_BRANCH_STEPS = Color(0xff33beff);
 const Color COLOR_BORDER_STEP_TOOLS = Color(0xFF020202);
 const Color COLOR_NAME_STEP = Color(0xFF100E0E);
 const Color COLOR_BORDER_ENABLED_DLG = Color(0xFFBBADAD);
+const Color COLOR_BORDER_STEP_INFO = Color(0xFF565555);
+const Color DEFAULT_COLOR_BACKGROUND_STEP_INFO = Color(0xFFC0C0C0);

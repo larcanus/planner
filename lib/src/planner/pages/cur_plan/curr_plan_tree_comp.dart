@@ -29,17 +29,54 @@ class CurrentPlanTree extends StatelessWidget {
               child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    FloatingActionButton(
-                      heroTag: 'btn1',
+                    ElevatedButton(
                       onPressed: () {
                         planController.setActiveStepBySelectStep();
-
                         game.refreshTree();
                       },
-                      backgroundColor: Colors.green,
-                      child: const Text('ACTIVATE'),
+                      style: ElevatedButton.styleFrom(
+                        elevation: 12.0,
+                        textStyle: const TextStyle(color: Colors.white),
+                        backgroundColor: COLOR_BUTTON_ACTIVATE,
+                      ),
+                      child: const Text(TITLE_BUTTON_ACTIVE),
                     ),
                   ]))
+        ]);
+      },
+      'stepInfo': (BuildContext context, TreeActiveStep game) {
+        String name = planController.selectedStepModel.name;
+        String desc = planController.selectedStepModel.description != ''
+            ? planController.selectedStepModel.description
+            : DEFAULT_STEP_INFO_DESC;
+        String background = planController.selectedStepModel.background ??
+            DEFAULT_COLOR_BACKGROUND_STEP_INFO;
+        return Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Container(
+              margin: const EdgeInsets.all(23),
+              padding: const EdgeInsets.all(10),
+              width: 160,
+              decoration: BoxDecoration(
+                  border: Border.all(
+                    color: COLOR_BORDER_STEP_INFO,
+                  ),
+                  color: HexColor.fromHex(background),
+                  borderRadius: const BorderRadius.all(Radius.circular(20))),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(name,
+                      overflow: TextOverflow.clip,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                          fontSize: 15, fontWeight: FontWeight.w700)),
+                  Text(desc,
+                      overflow: TextOverflow.clip, textAlign: TextAlign.start)
+                ],
+              ),
+            )
+          ])
         ]);
       }
     });
@@ -238,6 +275,9 @@ class TreeActiveStep extends FlameGame with HasTappables {
     super.onTapDown(pointerId, info);
     if (overlays.isActive('buttonActivate') && !info.handled) {
       overlays.remove('buttonActivate');
+    }
+    if (overlays.isActive('stepInfo') && !info.handled) {
+      overlays.remove('stepInfo');
     }
 
     // print('widget----${info.eventPosition.widget}');
