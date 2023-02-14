@@ -17,7 +17,7 @@ class PlanController extends GetxController {
   var _currentActiveStep = null;
   var _currentActivePlan = null;
   var _currentActivePlanName = TITLE_CURRENT_PLAM_IS_NOT_ACTIVE.obs;
-  var _selectedStepTools = null;
+  var _selectedStepBorder = null;
   var _selectedStep = null;
   var _selectedStepModel = null;
   var _selectedPlan = null;
@@ -61,9 +61,9 @@ class PlanController extends GetxController {
 
   set currentActivePlanName(name) => _currentActivePlanName.value = name;
 
-  get selectedStepTools => _selectedStepTools;
+  get selectedStepBorder => _selectedStepBorder;
 
-  set selectedStepTools(stepTools) => _selectedStepTools = stepTools;
+  set selectedStepBorder(StepBorder) => _selectedStepBorder = StepBorder;
 
   get selectedStep => _selectedStep;
 
@@ -483,6 +483,12 @@ class PlanController extends GetxController {
     componentsInGame
         .removeWhere((comp) => comp.toString() == 'StepRectangle' && comp.id == idStep);
     update();
+  }
+
+  void deleteCurrentStepBorder() {
+    if (selectedStepBorder != null) {
+      selectedStepBorder.removeFromParent();
+    }
   }
 
   void rebuildPositionByStep(StepModel step) {

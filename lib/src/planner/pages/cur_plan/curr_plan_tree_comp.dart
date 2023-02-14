@@ -279,6 +279,9 @@ class TreeActiveStep extends FlameGame with HasTappables {
     if (overlays.isActive('stepInfo') && !info.handled) {
       overlays.remove('stepInfo');
     }
+    if (!info.handled) {
+      planController.deleteCurrentStepBorder();
+    }
 
     // print('widget----${info.eventPosition.widget}');
     // print('global---${info.eventPosition.global}');

@@ -4,7 +4,7 @@ import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flame/palette.dart';
 import 'package:get/get.dart';
-import '../pages/builder/builder_page.dart';
+import 'package:planner/src/planner/flame_componets/step_border.dart';
 import '../state_manager/plan_controller.dart';
 
 class StepRectangle extends PositionComponent with Tappable {
@@ -50,8 +50,6 @@ class StepRectangle extends PositionComponent with Tappable {
   }
 
   void selectStep({force = false}) {
-    final touchPoint = Vector2(0, 0);
-    Vector2 sizeTools = Vector2(squareWidth, squareHeight);
     double posWidgetGlobalX = position.x + squareWidth / 2;
     double posWidgetGlobalY = position.y + squareHeight / 2;
 
@@ -62,16 +60,23 @@ class StepRectangle extends PositionComponent with Tappable {
     if (force) {
       camera.snap();
     }
-    StepTools stepTools = StepTools(position: touchPoint, size: sizeTools);
-    add(stepTools);
 
-    final selectedStepTools = planController.selectedStepTools;
-    if (selectedStepTools != null) {
-      selectedStepTools.removeFromParent();
-    }
-    planController.selectedStepTools = stepTools;
+    handlerBorder();
     planController.selectedStep = this;
     planController.selectedStepModel = planController.getStepById(id);
+  }
+
+  handlerBorder() {
+    Vector2 touchPoint = Vector2(0, 0);
+    Vector2 sizeTools = Vector2(squareWidth, squareHeight);
+    StepBorder stepBorder = StepBorder(position: touchPoint, size: sizeTools);
+    add(stepBorder);
+
+    dynamic selectedStepBorder = planController.selectedStepBorder;
+    if (selectedStepBorder != null) {
+      selectedStepBorder.removeFromParent();
+    }
+    planController.selectedStepBorder = stepBorder;
   }
 
   void handlerButtonsStep() {
@@ -136,28 +141,50 @@ class StepRectangleFrontPage extends StepRectangle {
   @override
   bool onTapDown(TapDownInfo info) {
     print('stepPosition.x----${position}');
+
+    int idActiveStep = planController.currentActiveStep.id;
+    planController.selectedStep = this;
+    planController.setStepModelById(id);
+    info.handled = true;
+
+    if (id != idActiveStep) {
+      handlerStepInfoOverlay(show: true);
+      handlerBtnActOverlay(show: true);
+    } else {
+      handlerStepInfoOverlay(show: true);
+      handlerBtnActOverlay(show: false);
+    }
+
+    handlerBorder();
+
+    return true;
+  }
+
+  handlerStepInfoOverlay({bool show = true}) {
     Game? game = findGame();
     var over = game?.overlays;
-    int idActiveStep = planController.currentActiveStep.id;
-    if (over != null && id != idActiveStep) {
-      info.handled = true;
-      planController.selectedStep = this;
-      planController.setStepModelById(id);
-
-      if (over.isActive('buttonActivate')) {
-        over.remove('buttonActivate');
-      }
+    if (over != null) {
       if (over.isActive('stepInfo')) {
         over.remove('stepInfo');
       }
-
-      over.add('stepInfo');
-      over.add('buttonActivate');
-    } else {
-      over?.remove('buttonActivate');
-      over?.remove('stepInfo');
+      if (show) {
+        over.add('stepInfo');
+      }
     }
-    return true;
+  }
+
+
+  handlerBtnActOverlay({bool show = true}) {
+    Game? game = findGame();
+    var over = game?.overlays;
+    if (over != null) {
+      if (over.isActive('buttonActivate')) {
+        over.remove('buttonActivate');
+      }
+      if (show) {
+        over.add('buttonActivate');
+      }
+    }
   }
 
   @override
