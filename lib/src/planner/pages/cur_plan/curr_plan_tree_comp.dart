@@ -262,11 +262,35 @@ class TreeActiveStep extends FlameGame with HasTappables {
       add(stepLine);
       planController.componentsInGame.add(stepLine);
 
+      addFakeStepLine(Vector2(position.x + stepW, position.y + stepH / 2),
+          step.childs.length);
+
       TextComponent textStep = TextBoxStep(step.name, position, step.background,
           Vector2(stepW, stepH), TEXT_BOX_FONT_SIZE_LAST_NEXT_STEP);
 
       add(textStep);
       planController.componentsInGame.add(textStep);
+    }
+  }
+
+  addFakeStepLine(startPos, countLines) {
+    var posEnd = Vector2(0,0);
+
+    switch( countLines ){
+      case 1 : posEnd = Vector2(100,0);
+      break;
+      case 2 : posEnd = Vector2(0,0);
+      break;
+      case 3 : posEnd = Vector2(0,0);
+      break;
+    }
+
+    for (var i = 0; countLines > i; i++) {
+      StepLine stepLine = StepLine(
+        positionStart: startPos,
+        positionEnd: posEnd,
+      );
+      add(stepLine);
     }
   }
 
