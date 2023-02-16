@@ -213,6 +213,10 @@ class TreeActiveStep extends FlameGame with HasTappables {
       add(stepLine);
       planController.componentsInGame.add(stepLine);
 
+      if (step.parentId != 0) {
+        addFakeLastStepLine(Vector2(position.x, position.y + stepH / 2), 1);
+      }
+
       TextComponent textStep = TextBoxStep(step.name, position, step.background,
           Vector2(stepW, stepH), TEXT_BOX_FONT_SIZE_LAST_NEXT_STEP);
 
@@ -262,7 +266,7 @@ class TreeActiveStep extends FlameGame with HasTappables {
       add(stepLine);
       planController.componentsInGame.add(stepLine);
 
-      addFakeStepLine(Vector2(position.x + stepW, position.y + stepH / 2),
+      addFakeNextStepLine(Vector2(position.x + stepW, position.y + stepH / 2),
           step.childs.length);
 
       TextComponent textStep = TextBoxStep(step.name, position, step.background,
@@ -273,24 +277,46 @@ class TreeActiveStep extends FlameGame with HasTappables {
     }
   }
 
-  addFakeStepLine(startPos, countLines) {
-    var posEnd = Vector2(0,0);
+  addFakeNextStepLine(startPos, countLines) {
+    var posEnd = [Vector2(100, 0)];
 
-    switch( countLines ){
-      case 1 : posEnd = Vector2(100,0);
-      break;
-      case 2 : posEnd = Vector2(0,0);
-      break;
-      case 3 : posEnd = Vector2(0,0);
-      break;
+    switch (countLines) {
+      case 2:
+        posEnd = [Vector2(100, -30), Vector2(100, 30)];
+        break;
+      case 3:
+        posEnd = [Vector2(100, -50), Vector2(100, 0), Vector2(100, 50)];
+        break;
+      case 4:
+        posEnd = [
+          Vector2(100, -70),
+          Vector2(100, -25),
+          Vector2(100, 25),
+          Vector2(100, 70)
+        ];
+        break;
     }
 
     for (var i = 0; countLines > i; i++) {
       StepLine stepLine = StepLine(
         positionStart: startPos,
-        positionEnd: posEnd,
+        positionEnd: posEnd[i],
       );
       add(stepLine);
+      planController.componentsInGame.add(stepLine);
+    }
+  }
+
+  addFakeLastStepLine(startPos, countLines) {
+    var posEnd = [Vector2(-100, 00)];
+
+    for (var i = 0; countLines > i; i++) {
+      StepLine stepLine = StepLine(
+        positionStart: startPos,
+        positionEnd: posEnd[i],
+      );
+      add(stepLine);
+      planController.componentsInGame.add(stepLine);
     }
   }
 
